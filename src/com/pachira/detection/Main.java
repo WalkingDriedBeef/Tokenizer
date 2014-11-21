@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import com.pachira.tokenizer.Dict;
 import com.pachira.tokenizer.Lat;
 import com.pachira.util.Constants;
+import com.pachira.util.FileUtils;
 
 public class Main {
 	public void coarse(String file, Lat lat, Dict dict, CoarseHandling chand, NgramCount ngramcount) {
@@ -24,6 +25,7 @@ public class Main {
 					if(cl == null || cl.trim().length() < 1)continue;
 					String seg = lat.segmenter(dict, cl);
 //					System.out.println(seg);
+					FileUtils.writefileByGBK("data", "XIYOUJI.seg", seg);
 					ngramcount.count(seg, Constants.NGRAM);
 				}
 			}
