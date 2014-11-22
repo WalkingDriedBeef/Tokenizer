@@ -13,19 +13,17 @@ import java.util.List;
  */
 public class SamplerProcessor implements PageProcessor {
 	public void process(Page page) {
-		List<String> links = page.getHtml().links().regex("http://my\\.oschina\\.net/flashsword/blog/\\d+").all();
+//		List<String> links = page.getHtml().links().regex("http://my\\.oschina\\.net/flashsword/blog/\\d+").all();
+		List<String> links = page.getHtml().links().all();
 		page.addTargetRequests(links);
-		for (String link: links) {
-			System.out.println(">>>" + link);
-		}
-//		page.putField("title", page.getHtml().xpath("//div[@class='BlogEntity']/div[@class='BlogTitle']/h1").toString());
-//		page.putField("content", page.getHtml().$("div.content").toString());
-//		page.putField("tags", page.getHtml().xpath("//div[@class='BlogTags']/a/text()").all());
+//		System.out.println(page.getHtml());
+		page.putField("content", page.getHtml().$("div#Zoom").toString());
 	}
-
+	
+	//http://www.dytt8.net/
 	@SuppressWarnings("deprecation")
 	public Site getSite() {
-		return Site.me().setDomain("my.oschina.net").addStartUrl("http://my.oschina.net/flashsword/blog");
+		return Site.me().setDomain("www.dytt8.net").addStartUrl("http://www.dytt8.net/");
 	}
 
 	public static void main(String[] args) {
