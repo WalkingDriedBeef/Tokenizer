@@ -2,11 +2,9 @@ package com.pachira.tokenizer;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
-import java.util.Timer;
 
 import com.pachira.util.Constants;
 
