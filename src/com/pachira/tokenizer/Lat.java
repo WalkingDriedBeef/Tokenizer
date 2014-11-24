@@ -114,7 +114,7 @@ public class Lat {
 //		Lat lat = new Lat();
 //		System.out.println(lat.segmenter(dict, sent));
 //		System.out.println(new Date());
-		Dict dict = new Dict("data/words.dict.bak");
+		Dict dict = new Dict("data/universal.dict");
 		String input = "data/XIYOUJI.txt";
 		Lat lat = new Lat();
 		lat.tokenizer(input, lat, dict);

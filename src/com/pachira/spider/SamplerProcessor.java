@@ -19,7 +19,6 @@ public class SamplerProcessor implements PageProcessor {
 //		System.out.println(page.getHtml());
 		page.putField("content", page.getHtml().$("div#Zoom").toString());
 	}
-	
 	//http://www.dytt8.net/
 	@SuppressWarnings("deprecation")
 	public Site getSite() {
