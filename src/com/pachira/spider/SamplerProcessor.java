@@ -17,12 +17,13 @@ public class SamplerProcessor implements PageProcessor {
 		List<String> links = page.getHtml().links().all();
 		page.addTargetRequests(links);
 //		System.out.println(page.getHtml());
-		page.putField("content", page.getHtml().$("div#Zoom").toString());
+		System.out.println(page.getHtml().getDocument().getElementsByTag("strong").text());
+		page.putField("content", page.getHtml().$("strong").toString());
 	}
 	//http://www.dytt8.net/
 	@SuppressWarnings("deprecation")
 	public Site getSite() {
-		return Site.me().setDomain("www.dytt8.net").addStartUrl("http://www.dytt8.net/");
+		return Site.me().addStartUrl("http://www.zgjhjy.com/html/Contact/1/1/");
 	}
 
 	public static void main(String[] args) {
