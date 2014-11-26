@@ -1,10 +1,17 @@
 package com.pachira.spider.downloader;
 
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -12,11 +19,16 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.google.common.collect.Sets;
 import com.pachira.spider.spider.Request;
 import com.pachira.spider.spider.WebSite;
 import com.pachira.spider.util.HttpInfoConstant;
+import com.pachira.spider.util.UrlUtils;
 
 
 public class Downloader implements DownloaderInter {
@@ -44,10 +56,24 @@ public class Downloader implements DownloaderInter {
         try {
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
             httpResponse = getHttpClient(site).execute(httpUriRequest);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            System.out.println(httpResponse.getStatusLine());
-            System.out.println(EntityUtils.toString(httpResponse.getEntity()));
+            Header heads[] = httpResponse.getAllHeaders();
+            if(charset == null){
+            	byte [] contentBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
+            	charset = getHtmlCharset(httpResponse, contentBytes);
+            	System.out.println("GET CHARSET FROM HTML: " + charset);
+            	System.out.println(new String(contentBytes, charset));
+            }else{
+            	System.out.println(EntityUtils.toString(httpResponse.getEntity(),charset));
+            }
+            for (Header her : heads) {
+				System.out.println(her.toString());
+			}
+            System.out.println("===================");
+//            System.out.println(httpResponse.getStatusLine().getStatusCode());
+//            System.out.println(httpResponse.getStatusLine().getReasonPhrase());
+//            System.out.println(httpResponse.getStatusLine().getProtocolVersion());
         } catch (IOException e) {
+        	e.printStackTrace();
         	System.err.println("download page " + request.getUrl() + " error");
         } finally {
         }
@@ -113,5 +139,41 @@ public class Downloader implements DownloaderInter {
 		}
 		throw new IllegalArgumentException("Illegal HTTP Method " + method);
 	}
+	protected String getHtmlCharset(HttpResponse httpResponse, byte[] contentBytes) throws IOException {
+        String charset;
+        // 1. encoding in http header Content-Type
+        String value = httpResponse.getEntity().getContentType().getValue();
+        charset = UrlUtils.getCharset(value);
+        if (StringUtils.isNotBlank(charset)) {
+        	System.err.println("Auto get charset: {}");
+            return charset;
+        }
+        // use default charset to decode first time
+        Charset defaultCharset = Charset.defaultCharset();
+        String content = new String(contentBytes, defaultCharset.name());
+        // 2.charset in meta
+        if (StringUtils.isNotEmpty(content)) {
+            Document document = Jsoup.parse(content);
+            Elements links = document.select("meta");
+            for (Element link : links) {
+                // 2.1 html4.01 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                String metaContent = link.attr("content");
+                String metaCharset = link.attr("charset");
+                if (metaContent.indexOf("charset") != -1) {
+                    metaContent = metaContent.substring(metaContent.indexOf("charset"), metaContent.length());
+                    charset = metaContent.split("=")[1];
+                    break;
+                }
+                // 2.2 html5 <meta charset="UTF-8" />
+                else if (StringUtils.isNotEmpty(metaCharset)) {
+                    charset = metaCharset;
+                    break;
+                }
+            }
+        }
+        System.err.println("Auto get charset: {}");
+        // 3 odo use tools as cpdetector for content decode
+        return charset;
+    }
 
 }
