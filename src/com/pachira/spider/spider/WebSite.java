@@ -45,16 +45,8 @@ public class WebSite {
     private Map<String, String> headers = new HashMap<String, String>();
 
     private boolean useGzip = true;
-
-    /**
-     * @see us.codecraft.webmagic.utils.HttpConstant.Header
-     * @deprecated
-     */
-    public static interface HeaderConst {
-
-        public static final String REFERER = "Referer";
-    }
-
+    
+    public static final String REFERER = "Referer";
 
     static {
         DEFAULT_STATUS_CODE_SET.add(200);
@@ -217,7 +209,6 @@ public class WebSite {
      * @see #getStartRequests
      * @deprecated
      */
-    @Deprecated
     public List<String> getStartUrls() {
         return UrlUtils.convertToUrls(startRequests);
     }
@@ -246,7 +237,6 @@ public class WebSite {
      * @param startRequest
      * @return this
      * @see Spider#addRequest(Request...)
-     * @deprecated
      */
     public WebSite addStartRequest(Request startRequest) {
         this.startRequests.add(startRequest);
