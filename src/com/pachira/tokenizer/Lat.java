@@ -2,6 +2,7 @@ package com.pachira.tokenizer;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -108,15 +109,16 @@ public class Lat {
 		}
 	}
 	public static void main(String[] args) {
-//		System.out.println(new Date());
-//		Dict dict = new Dict("data/words.dict.bak");
-//		String sent = "笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑";
-//		Lat lat = new Lat();
-//		System.out.println(lat.segmenter(dict, sent));
-//		System.out.println(new Date());
-		Dict dict = new Dict("data/words.dict.bak");
-		String input = "data/XIYOUJI.txt";
+		System.out.println(new Date());
+		Dict dict = new Dict("data/universal.dict");
+		String sent = "笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑";
 		Lat lat = new Lat();
-		lat.tokenizer(input, lat, dict);
+		System.out.println(new Date());
+		System.out.println(lat.segmenter(dict, sent));
+		System.out.println(new Date());
+//		Dict dict = new Dict("data/universal.dict");
+//		String input = "data/XIYOUJI.txt";
+//		Lat lat = new Lat();
+//		lat.tokenizer(input, lat, dict);
 	}
 }

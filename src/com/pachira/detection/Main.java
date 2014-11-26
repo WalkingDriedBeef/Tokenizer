@@ -24,7 +24,7 @@ public class Main {
 				for(String cl: coarseline.trim().split(" ")){
 					if(cl == null || cl.trim().length() < 1)continue;
 					String seg = lat.segmenter(dict, cl);
-//					System.out.println(seg);
+					System.out.println(seg);
 					FileUtils.writefileByGBK("data", "XIYOUJI.seg", seg);
 					ngramcount.count(seg, Constants.NGRAM);
 				}
@@ -36,8 +36,8 @@ public class Main {
 		}
 	}
 	public static void main(String[] args) {
-		String file = "data/XIYOUJI.txt";
-		String dict_path = "data/words.dict.bak";
+		String file = "data/014.txt";
+		String dict_path = "data/universal.dict";
 		Main main = new Main();
 		CoarseHandling chand = new CoarseHandling();
 		Lat lat = new Lat();
