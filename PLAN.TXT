@@ -6,3 +6,7 @@
 PART ONE: 数据抓取
 STEP1: 爬虫的研究（web magic）
 a).开放网站数据的抓取--HttpClient接口的了解、使用、封装;
+下载器         ---> 抽取web magic
+链接管理器  ---> 链接提取、链接管理    --| 
+解析器         ---> Dom                --| 抽取 jsoup
+持久化         ---> redis
