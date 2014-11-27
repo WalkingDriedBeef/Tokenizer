@@ -1,22 +1,26 @@
 package com.pachira.spider.core;
 
+import com.pachira.spider.downloader.HttpClientDownloader;
+import com.pachira.spider.downloader.HttpClientDownloaderInter;
+import com.pachira.spider.parser.Page;
+
 public class Spider {
 	/**
 	 * step1: get request and download the request page, then get all links on request page!
 	 */
-	private Request request = null;
-	public Request getRequest() {
-		return request;
+	public static Spider create(PageProcessor process) {
+		return new Spider(process);
 	}
-	public Spider() {
+	private PageProcessor proccess = null;
+	
+	public Spider(PageProcessor process) {
+		this.proccess = process;
 	}
-	public Spider(Request request) {
-		this.request = request;
-	}
-	public Spider create(Request request) {
-		return new Spider(request);
-	}
+
 	public void run(){
+		HttpClientDownloaderInter downloader = new HttpClientDownloader();
+		Page page = downloader.download(proccess.getSite().getStartRequests().get(0), proccess.getSite());
+		proccess.proccess(page);
 	}
 
 }
