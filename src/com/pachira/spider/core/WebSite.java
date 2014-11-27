@@ -40,7 +40,7 @@ public class WebSite {
 
     private static final Set<Integer> DEFAULT_STATUS_CODE_SET = new HashSet<Integer>();
 
-    private Set<Integer> acceptStatCode = DEFAULT_STATUS_CODE_SET;
+    private Set<Integer> acceptStatusCodes  = DEFAULT_STATUS_CODE_SET;
 
     private Map<String, String> headers = new HashMap<String, String>();
 
@@ -188,8 +188,8 @@ public class WebSite {
      * @param acceptStatCode
      * @return this
      */
-    public WebSite setAcceptStatCode(Set<Integer> acceptStatCode) {
-        this.acceptStatCode = acceptStatCode;
+    public WebSite setAcceptStatCode(Set<Integer> acceptStatusCodes) {
+        this.acceptStatusCodes = acceptStatusCodes;
         return this;
     }
 
@@ -199,7 +199,7 @@ public class WebSite {
      * @return acceptStatCode
      */
     public Set<Integer> getAcceptStatCode() {
-        return acceptStatCode;
+        return acceptStatusCodes;
     }
 
     /**
@@ -351,7 +351,7 @@ public class WebSite {
         if (retryTimes != site.retryTimes) return false;
         if (sleepTime != site.sleepTime) return false;
         if (timeOut != site.timeOut) return false;
-        if (acceptStatCode != null ? !acceptStatCode.equals(site.acceptStatCode) : site.acceptStatCode != null)
+        if (acceptStatusCodes != null ? ! acceptStatusCodes.equals(site.acceptStatusCodes) : site.acceptStatusCodes != null)
             return false;
         if (charset != null ? !charset.equals(site.charset) : site.charset != null) return false;
         if (defaultCookies != null ? !defaultCookies.equals(site.defaultCookies) : site.defaultCookies != null)
@@ -376,7 +376,7 @@ public class WebSite {
         result = 31 * result + retryTimes;
         result = 31 * result + cycleRetryTimes;
         result = 31 * result + timeOut;
-        result = 31 * result + (acceptStatCode != null ? acceptStatCode.hashCode() : 0);
+        result = 31 * result + (acceptStatusCodes != null ? acceptStatusCodes.hashCode() : 0);
         result = 31 * result + (headers != null ? headers.hashCode() : 0);
         return result;
     }
@@ -393,7 +393,7 @@ public class WebSite {
                 ", retryTimes=" + retryTimes +
                 ", cycleRetryTimes=" + cycleRetryTimes +
                 ", timeOut=" + timeOut +
-                ", acceptStatCode=" + acceptStatCode +
+                ", acceptStatusCodes=" + acceptStatusCodes +
                 ", headers=" + headers +
                 '}';
     }

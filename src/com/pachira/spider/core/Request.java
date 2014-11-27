@@ -13,14 +13,8 @@ public class Request implements Serializable {
 	//store the extras info
 	private Map<String, Object> extras = null;
 	//store the status code
-	private String STATUS_CODE = "DEFAULT_STATUS";
+	public static final String STATUS_CODE = "STATUS_CODE";
 	
-	public String getSTATUS_CODE() {
-		return STATUS_CODE;
-	}
-	public void setSTATUS_CODE(String sTATUS_CODE) {
-		STATUS_CODE = sTATUS_CODE;
-	}
 	public void setUrl(String url) {
 		this.url = url;
 	}
@@ -43,8 +37,6 @@ public class Request implements Serializable {
 		extras.put(extra, val);
 		return this;
 	}
-	public Request() {
-	}
 	public Request(String url) {
 		this.url = url;
 	}
@@ -58,6 +50,13 @@ public class Request implements Serializable {
 	}
 	public String getMethod() {
 		return method;
+	}
+	@Override
+	public String toString() {
+		StringBuilder accum = new StringBuilder();
+		accum.append("{url: " + this.getUrl() + ";");
+		accum.append("method: " + this.getMethod() + "}");
+		return accum.toString();
 	}
 
 }

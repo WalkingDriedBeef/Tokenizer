@@ -20,54 +20,80 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.pachira.spider.core.Request;
 import com.pachira.spider.core.WebSite;
 import com.pachira.spider.parser.LinksExtractor;
+import com.pachira.spider.parser.Page;
 import com.pachira.spider.util.HttpInfoConstant;
 import com.pachira.spider.util.UrlUtils;
 
 
-public class Downloader implements DownloaderInter {
+public class HttpClientDownloader implements HttpClientDownloaderInter {
 	public static void main(String[] args) {
 		Request request = new Request("http://www.dytt8.net/");
 		WebSite site = new WebSite();
 		site.addStartRequest(request);
-		Downloader downloader = new Downloader();
-		downloader.download(request, site);
+		HttpClientDownloader downloader = new HttpClientDownloader();
+		Page page = downloader.download(request, site);
+		System.out.println(page);
 	}
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	private HttpClientGenerator httpClientGenerator = new HttpClientGenerator();
 	private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
 	private LinksExtractor extractor = new LinksExtractor();
-	public void download(Request request, WebSite site) {
+	
+	public Page download(Request request, WebSite site) {
         String charset = null;
         Map<String, String> headers = null;
+        Set<Integer> acceptStatusCodes = null;
         if (site != null) {
+        	acceptStatusCodes = site.getAcceptStatCode();
             charset = site.getCharset();
             headers = site.getHeaders();
+        }else{
+        	acceptStatusCodes = Sets.newHashSet(200);
         }
         CloseableHttpResponse httpResponse = null;
         try {
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
             httpResponse = getHttpClient(site).execute(httpUriRequest);
-            if(charset == null){
-            	byte [] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
-            	charset = getHtmlCharset(httpResponse, contentBytes);
-            	String content = new String(contentBytes, charset);
-//            	System.out.println(content);
-            	Set<String> links = extractor.links(content, request.getUrl());
-            	for (String string : links) {
-					System.out.println(string);
-				}
+            request.setMethod(httpUriRequest.getMethod());
+            request.putExtra(Request.STATUS_CODE, httpResponse.getStatusLine().getStatusCode());
+            if(acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())){
+            	return handleResponse(request, httpResponse, charset);
             }else{
-            	System.out.println(EntityUtils.toString(httpResponse.getEntity(),charset));
+            	logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
             }
         } catch (IOException e) {
-        	e.printStackTrace();
-        	System.err.println("download page " + request.getUrl() + " error");
+        	logger.warn("download page " + request.getUrl() + " error", e);
         } finally {
+        	
         }
+        return null;
     }
+	private String getContent(CloseableHttpResponse httpResponse, String charset) throws IOException{
+		if (charset == null) {
+			byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
+			charset = getHtmlCharset(httpResponse, contentBytes);
+			return new String(contentBytes, charset);
+		} else {
+			return EntityUtils.toString(httpResponse.getEntity());
+		}
+	}
+	private Page handleResponse(Request request, CloseableHttpResponse httpResponse, String charset) throws IOException{
+		String content = getContent(httpResponse, charset);
+		Page page = new Page();
+		page.setUrl(request.getUrl());
+		page.setRequest(request);
+		page.setStatusCode(httpResponse.getStatusLine().getStatusCode());
+		page.setText(content);
+		page.addTargetRequests(extractor.links(content, request.getUrl()));
+		return page;
+	}
 	private CloseableHttpClient getHttpClient(WebSite site) {
         if (site == null) {
             return httpClientGenerator.getClient(null);
@@ -135,7 +161,7 @@ public class Downloader implements DownloaderInter {
         String value = httpResponse.getEntity().getContentType().getValue();
         charset = UrlUtils.getCharset(value);
         if (StringUtils.isNotBlank(charset)) {
-        	System.err.println("Auto get charset: {}");
+        	logger.info("Auto get charset: {}",  charset);
             return charset;
         }
         // use default charset to decode first time
@@ -161,7 +187,7 @@ public class Downloader implements DownloaderInter {
                 }
             }
         }
-        System.err.println("Auto get charset: {}");
+        logger.info("Auto get charset: {}",  charset);
         // 3 use tools as cpdetector for content decode
         return charset;
     }
