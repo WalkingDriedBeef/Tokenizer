@@ -5,14 +5,14 @@ import com.pachira.spider.parser.Page;
 public class Main implements PageProcessor{
 
 	public WebSite getSite() {
-		return new WebSite().addStartRequest(new Request("http://www.dytt8.net"));
+		return new WebSite().addStartRequest(new Request("http://www.dytt.net"));
 	}
 
 	public void proccess(Page page) {
 		System.out.println(page);
 	}
 	public static void main(String[] args) {
-		Spider.create(new Main()).run();
+		Spider.create(new Main()).thread(1).run();
 	}
 
 }
