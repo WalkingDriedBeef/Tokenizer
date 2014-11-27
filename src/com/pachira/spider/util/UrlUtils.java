@@ -2,7 +2,7 @@ package com.pachira.spider.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.pachira.spider.spider.Request;
+import com.pachira.spider.core.Request;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package com.pachira.spider.spider;
+package com.pachira.spider.core;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -12,7 +12,21 @@ public class Request implements Serializable {
 	private String method = null;
 	//store the extras info
 	private Map<String, Object> extras = null;
+	//store the status code
+	private String STATUS_CODE = "DEFAULT_STATUS";
 	
+	public String getSTATUS_CODE() {
+		return STATUS_CODE;
+	}
+	public void setSTATUS_CODE(String sTATUS_CODE) {
+		STATUS_CODE = sTATUS_CODE;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public void setMethod(String method) {
+		this.method = method;
+	}
 	public Map<String, Object> getExtras() {
 		return extras;
 	}

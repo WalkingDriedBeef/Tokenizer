@@ -2,15 +2,12 @@ package com.pachira.spider.downloader;
 
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -24,16 +21,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.google.common.collect.Sets;
-import com.pachira.spider.spider.Request;
-import com.pachira.spider.spider.WebSite;
+import com.pachira.spider.core.Request;
+import com.pachira.spider.core.WebSite;
+import com.pachira.spider.parser.LinksExtractor;
 import com.pachira.spider.util.HttpInfoConstant;
 import com.pachira.spider.util.UrlUtils;
 
 
 public class Downloader implements DownloaderInter {
 	public static void main(String[] args) {
-		Request request = new Request("http://www.dytt.net");
+		Request request = new Request("http://www.dytt8.net/");
 		WebSite site = new WebSite();
 		site.addStartRequest(request);
 		Downloader downloader = new Downloader();
@@ -41,37 +38,30 @@ public class Downloader implements DownloaderInter {
 	}
 	private HttpClientGenerator httpClientGenerator = new HttpClientGenerator();
 	private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
+	private LinksExtractor extractor = new LinksExtractor();
 	public void download(Request request, WebSite site) {
-        Set<Integer> acceptStatCode;
         String charset = null;
         Map<String, String> headers = null;
         if (site != null) {
-            acceptStatCode = site.getAcceptStatCode();
             charset = site.getCharset();
             headers = site.getHeaders();
-        } else {
-            acceptStatCode = Sets.newHashSet(200);
         }
         CloseableHttpResponse httpResponse = null;
         try {
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
             httpResponse = getHttpClient(site).execute(httpUriRequest);
-            Header heads[] = httpResponse.getAllHeaders();
             if(charset == null){
-            	byte [] contentBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
+            	byte [] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
             	charset = getHtmlCharset(httpResponse, contentBytes);
-            	System.out.println("GET CHARSET FROM HTML: " + charset);
-            	System.out.println(new String(contentBytes, charset));
+            	String content = new String(contentBytes, charset);
+//            	System.out.println(content);
+            	Set<String> links = extractor.links(content, request.getUrl());
+            	for (String string : links) {
+					System.out.println(string);
+				}
             }else{
             	System.out.println(EntityUtils.toString(httpResponse.getEntity(),charset));
             }
-            for (Header her : heads) {
-				System.out.println(her.toString());
-			}
-            System.out.println("===================");
-//            System.out.println(httpResponse.getStatusLine().getStatusCode());
-//            System.out.println(httpResponse.getStatusLine().getReasonPhrase());
-//            System.out.println(httpResponse.getStatusLine().getProtocolVersion());
         } catch (IOException e) {
         	e.printStackTrace();
         	System.err.println("download page " + request.getUrl() + " error");
@@ -172,7 +162,7 @@ public class Downloader implements DownloaderInter {
             }
         }
         System.err.println("Auto get charset: {}");
-        // 3 odo use tools as cpdetector for content decode
+        // 3 use tools as cpdetector for content decode
         return charset;
     }
 

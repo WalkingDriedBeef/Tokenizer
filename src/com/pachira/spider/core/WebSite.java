@@ -1,4 +1,4 @@
-package com.pachira.spider.spider;
+package com.pachira.spider.core;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

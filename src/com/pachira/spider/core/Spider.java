@@ -1,4 +1,4 @@
-package com.pachira.spider.spider;
+package com.pachira.spider.core;
 
 public class Spider {
 	/**

@@ -15,7 +15,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.HttpContext;
 
-import com.pachira.spider.spider.WebSite;
+import com.pachira.spider.core.WebSite;
 
 import java.io.IOException;
 import java.util.Map;
