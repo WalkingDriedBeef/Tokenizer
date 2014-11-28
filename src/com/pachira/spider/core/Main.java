@@ -12,7 +12,7 @@ public class Main implements PageProcessor{
 		System.out.println(page);
 	}
 	public static void main(String[] args) {
-		Spider.create(new Main()).thread(1).run();
+		Spider.create(new Main()).thread(5).run();
 	}
 
 }

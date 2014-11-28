@@ -1,6 +1,7 @@
 package com.pachira.spider.core;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
@@ -34,11 +35,13 @@ public class Spider {
         if (threadpool == null || threadpool.isShutdown()) {
                 threadpool = new ThreadPoolExecutors(threadNum);
         }
+        if(queue == null){
+        	queue = new LinkedList<Request>();
+        }
         if(startRequests == null){
         	startRequests = this.process.getSite().getStartRequests();
         }
         if (startRequests != null) {
-        	System.out.println(startRequests.size());
             for (Request request : startRequests) {
                 queue.add(request);
             }
@@ -57,35 +60,36 @@ public class Spider {
 	public static Spider create(PageProcessor process) {
 		return new Spider(process);
 	}
+
 	public void run() {
 		initComponent();
-        logger.info("Spider - [" + UUID.randomUUID().toString() + "] started!");
-        
-        while (!Thread.currentThread().isInterrupted()) {
-            Request request = queue.poll();
-            
-            if (request == null) {
-                if (threadpool.getThreadAlive() == 0) {
-                    break;
-                }
-//                 wait until new url added
-//                waitNewUrl();
-                logger.info("wait unitil new url added!");
-            } else {
-                final Request requestFinal = request;
-                threadpool.execute(new Runnable() {
-                    public void run() {
-                        try {
-                            processRequest(requestFinal);
-                        } catch (Exception e) {
-                            logger.error("process request " + requestFinal + " error", e);
-                        } finally {
-//                            signalNewUrl();
-                        }
-                    }
-                });
-            }
-        }
+		logger.info("Spider - [" + UUID.randomUUID().toString() + "] started!");
+
+		while (!Thread.currentThread().isInterrupted()) {
+			Request request = queue.poll();
+			if (request == null) {
+				if (threadpool.getThreadAlive() == 0) {
+					break;
+				}
+				// wait until new url added
+				// waitNewUrl();
+				logger.info("wait unitil new url added!");
+			} else {
+				final Request requestFinal = request;
+				threadpool.execute(new Runnable() {
+					public void run() {
+						try {
+							processRequest(requestFinal);
+						} catch (Exception e) {
+							logger.error("process request " + requestFinal
+									+ " error", e);
+						} finally {
+							// signalNewUrl();
+						}
+					}
+				});
+			}
+		}
 	}
 	private void processRequest(Request request) {
 		Page page = downloader.download(request, this.process.getSite());
