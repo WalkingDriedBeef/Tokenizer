@@ -6,10 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 /**
  * Thread pool for workers.<br></br>
  * Use {@link java.util.concurrent.ExecutorService} as inner implement. <br></br>
@@ -22,7 +18,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ThreadPoolExecutors {
 	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
     private int threadNum;
     private AtomicInteger threadAlive = new AtomicInteger();
     private ReentrantLock reentrantLock = new ReentrantLock();
@@ -51,7 +46,7 @@ public class ThreadPoolExecutors {
                     try {
                     	//如果当前线程池依然没有空闲线程，则等待，直到线程池有空闲线程，之后释放锁
                         condition.await();
-                        logger.warn("thread pool is full!");
+//                        logger.warn("thread pool is full!");
                     } catch (InterruptedException e) {
                     }
                 }

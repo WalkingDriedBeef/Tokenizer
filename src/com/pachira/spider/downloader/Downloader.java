@@ -2,6 +2,7 @@ package com.pachira.spider.downloader;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,17 +33,17 @@ import com.pachira.spider.util.HttpInfoConstant;
 import com.pachira.spider.util.UrlUtils;
 
 
-public class HttpClientDownloader implements HttpClientDownloaderInter {
+public class Downloader implements DownloaderInter {
 	public static void main(String[] args) {
 		Request request = new Request("http://www.dytt8.net/");
 		WebSite site = new WebSite();
 		site.addStartRequest(request);
-		HttpClientDownloader downloader = new HttpClientDownloader();
+		Downloader downloader = new Downloader();
 		Page page = downloader.download(request, site);
 		System.out.println(page);
 	}
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private HttpClientGenerator httpClientGenerator = new HttpClientGenerator();
+	private DownLoaderGenerator httpClientGenerator = new DownLoaderGenerator();
 	private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
 	private LinksExtractor extractor = new LinksExtractor();
 	
@@ -69,7 +70,7 @@ public class HttpClientDownloader implements HttpClientDownloaderInter {
             	logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
             }
         } catch (IOException e) {
-        	logger.warn("download page " + request.getUrl() + " error", e);
+        	logger.warn("download page error:" + request.getUrl() , e);
         } finally {
         	
         }
@@ -79,7 +80,11 @@ public class HttpClientDownloader implements HttpClientDownloaderInter {
 		if (charset == null) {
 			byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
 			charset = getHtmlCharset(httpResponse, contentBytes);
-			return new String(contentBytes, charset);
+			if(charset == null || StringUtils.isBlank(charset)){
+				return EntityUtils.toString(httpResponse.getEntity());
+			}else{
+				return new String(contentBytes, charset);
+			}
 		} else {
 			return EntityUtils.toString(httpResponse.getEntity());
 		}
@@ -155,8 +160,8 @@ public class HttpClientDownloader implements HttpClientDownloaderInter {
 		}
 		throw new IllegalArgumentException("Illegal HTTP Method " + method);
 	}
-	protected String getHtmlCharset(HttpResponse httpResponse, byte[] contentBytes) throws IOException {
-        String charset;
+	protected String getHtmlCharset(HttpResponse httpResponse, byte[] contentBytes) throws UnsupportedEncodingException  {
+        String charset = null;
         // 1. encoding in http header Content-Type
         String value = httpResponse.getEntity().getContentType().getValue();
         charset = UrlUtils.getCharset(value);

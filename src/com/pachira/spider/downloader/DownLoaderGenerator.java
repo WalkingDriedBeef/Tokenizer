@@ -20,7 +20,7 @@ import com.pachira.spider.core.WebSite;
 import java.io.IOException;
 import java.util.Map;
 
-public class HttpClientGenerator {
+public class DownLoaderGenerator {
 	/**
 	 * PoolingHttpClientConnectionManager
 	 * 1.它管理着连接池，可以同时为很多线程提供http连接请求
@@ -29,7 +29,7 @@ public class HttpClientGenerator {
 	 */
     private PoolingHttpClientConnectionManager connectionManager;
 
-    public HttpClientGenerator() {
+    public DownLoaderGenerator() {
     	//自定义的socket工厂类可以和指定的协议（Http、Https）联系起来，用来创建自定义的连接管理器
     	Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()  
     	        .register("http", PlainConnectionSocketFactory.INSTANCE)  
@@ -39,7 +39,7 @@ public class HttpClientGenerator {
         //设置每个路由上的最大连接数
         connectionManager.setDefaultMaxPerRoute(100);
     }
-    public HttpClientGenerator setPoolSize(int poolSize) {
+    public DownLoaderGenerator setPoolSize(int poolSize) {
     	//设置连接池最大连接数
         connectionManager.setMaxTotal(poolSize);
         return this;
