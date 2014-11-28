@@ -1,5 +1,6 @@
 package com.pachira.spider.core;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -8,6 +9,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.pachira.spider.downloader.Downloader;
 import com.pachira.spider.downloader.DownloaderInter;
 import com.pachira.spider.parser.Page;
@@ -20,6 +22,7 @@ public class Spider {
 	private DownloaderInter downloader = null;
 	private List<Request> startRequests = null;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private HashSet<String> allLinks = null;
 	
 	private Spider(PageProcessor process) {
 		this.process = process;
@@ -27,6 +30,9 @@ public class Spider {
     protected void initComponent() {
         if (downloader == null) {
             this.downloader = new Downloader();
+        }
+        if(allLinks == null){
+        	allLinks = Sets.newHashSet();
         }
         if (threadpool == null || threadpool.isShutdown()) {
                 threadpool = new ThreadPoolExecutors(threadNum);
@@ -41,6 +47,7 @@ public class Spider {
         if (startRequests != null) {
             for (Request request : startRequests) {
                 queue.add(request);
+                allLinks.add(request.getUrl());
             }
         }
     }
@@ -88,28 +95,38 @@ public class Spider {
 		public void run() {
 			processRequest(this.request);
 		}
-		private void processRequest(Request request) {
+		/**
+		 * process current request,then pageage the response to a page object!
+		 * @param request
+		 */
+		private synchronized void processRequest(Request request) {
 			Page page = downloader.download(request, process.getSite());
 	        if (page == null) {
-//	            onError(request);
-	            logger.error("download html " + request.getUrl() +" error!");
-	            return;
+	        	page = new Page();
+	        	page.setNeedCycleRetry(true);
+	        	page.setRequest(request);
+	        	//if download current html error, so cycle retry!
+	            logger.info("html " + request.getUrl() +" is need cycle retry!");
+	        }else{
+	        	//if download current html success, so show this page
+	        	process.proccess(page);
 	        }
-	        // for cycle retry
-	        if (page.isNeedCycleRetry()) {
-	        	logger.error("html " + request.getUrl() +" is need cycle retry!");
-	        }
-	        process.proccess(page);
-	        addTargetRequests(page);
+	        addTargetRequests(page, page.isNeedCycleRetry());
 		}
-		//queue is thread safe
-		private void addTargetRequests(Page page){
-			if (CollectionUtils.isNotEmpty(page.getTargetRequests())) {
+		//add target requests(if request is need cycle retry, so just add current request or add response requets to the queue)
+		private void addTargetRequests(Page page, boolean isNeddCycleRetry){
+			if (!isNeddCycleRetry && CollectionUtils.isNotEmpty(page.getTargetRequests())) {
 	            for (Request request : page.getTargetRequests()) {
-	                queue.add(request);
+	            	if(!allLinks.contains(request.getUrl())){
+	            		queue.add(request);
+	            	}
 	            }
-	            logger.info(String.format("LinkedBlockingQueue Size: [ %d ]",queue.size()));
+	        }else{
+	        	if(!allLinks.contains(request.getUrl())){
+	        		queue.add(page.getRequest());
+	        	}
 	        }
+			logger.info(String.format("LinkedBlockingQueue Size: [ %d ]",queue.size()));
 		}
 	}
 	

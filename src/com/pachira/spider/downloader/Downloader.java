@@ -34,14 +34,6 @@ import com.pachira.spider.util.UrlUtils;
 
 
 public class Downloader implements DownloaderInter {
-	public static void main(String[] args) {
-		Request request = new Request("http://www.dytt8.net/");
-		WebSite site = new WebSite();
-		site.addStartRequest(request);
-		Downloader downloader = new Downloader();
-		Page page = downloader.download(request, site);
-		System.out.println(page);
-	}
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private DownLoaderGenerator httpClientGenerator = new DownLoaderGenerator();
 	private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
@@ -70,7 +62,7 @@ public class Downloader implements DownloaderInter {
             	logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
             }
         } catch (IOException e) {
-        	logger.warn("download page error:" + request.getUrl() , e);
+        	logger.error("download page error:" + request.getUrl() , e);
         } finally {
         	
         }
