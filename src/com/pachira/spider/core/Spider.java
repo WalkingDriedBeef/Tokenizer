@@ -1,10 +1,9 @@
 package com.pachira.spider.core;
 
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -21,14 +20,12 @@ public class Spider {
 	private PageProcessor process = null;
 	private HttpClientDownloaderInter downloader = null;
 	private List<Request> startRequests = null;
-	private Date startTime = null;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private Spider(PageProcessor process) {
 		this.process = process;
 	}
     protected void initComponent() {
-    	startTime = new Date();
         if (downloader == null) {
             this.downloader = new HttpClientDownloader();
         }
@@ -36,7 +33,8 @@ public class Spider {
                 threadpool = new ThreadPoolExecutors(threadNum);
         }
         if(queue == null){
-        	queue = new LinkedList<Request>();
+        	//thread safe
+        	queue = new LinkedBlockingQueue<Request>();
         }
         if(startRequests == null){
         	startRequests = this.process.getSite().getStartRequests();
@@ -67,6 +65,7 @@ public class Spider {
 
 		while (!Thread.currentThread().isInterrupted()) {
 			Request request = queue.poll();
+			System.out.println(request);
 			if (request == null) {
 				if (threadpool.getThreadAlive() == 0) {
 					break;
@@ -81,8 +80,7 @@ public class Spider {
 						try {
 							processRequest(requestFinal);
 						} catch (Exception e) {
-							logger.error("process request " + requestFinal
-									+ " error", e);
+							logger.error("process request " + requestFinal + " error", e);
 						} finally {
 							// signalNewUrl();
 						}
@@ -105,6 +103,7 @@ public class Spider {
         this.process.proccess(page);;
         addTargetRequests(page);
 	}
+	//queue is thread safe
 	private void addTargetRequests(Page page){
 		if (CollectionUtils.isNotEmpty(page.getTargetRequests())) {
             for (Request request : page.getTargetRequests()) {
