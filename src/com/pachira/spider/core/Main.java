@@ -6,11 +6,11 @@ import com.pachira.spider.parser.Page;
 public class Main implements PageProcessor{
 	private Pipeline pip = new Pipeline();
 	public WebSite getSite() {
-		return new WebSite().setDomain("http://www.dytt.net").addStartRequest(new Request("http://www.dytt.net"));
+		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 	}
 
 	public void proccess(Page page) {
-		pip.ps_urls(page.getTargetRequests());
+		pip.ps_url(page.getUrl());
 //		System.out.println(page.getUrl());
 //		if(page == null) return;
 //		StringBuilder accum = new StringBuilder();

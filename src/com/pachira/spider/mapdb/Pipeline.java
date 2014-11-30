@@ -1,6 +1,5 @@
 package com.pachira.spider.mapdb;
 
-import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 
@@ -27,12 +26,24 @@ public class Pipeline {
 			current_size = 0;
 		}
 	}
+	public synchronized void ps_url(String line) {
+		current_size += 1;
+		urlMapDB.put(GenUtils.md5(line), line);
+		if(current_size % BUFFER_SIZE == 0){
+			logger.info("url map db commit.");
+			urlMapDB.commit();
+			current_size = 0;
+		}
+	}
+	public void close() {
+		urlMapDB.close();
+	}
 	public static void main(String[] args) {
 		Pipeline pip = new Pipeline();
 		Map<String, String> map = pip.urlMapDB.getURL_DB_TREEMAP();
-		System.out.println(map.size());
 		for(String key: map.keySet()){
 			System.out.println(key + "\t" + map.get(key));
 		}
+		System.out.println(map.size());
 	}
 }

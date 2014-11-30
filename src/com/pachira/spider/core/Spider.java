@@ -1,6 +1,5 @@
 package com.pachira.spider.core;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,9 +8,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.pachira.spider.downloader.Downloader;
 import com.pachira.spider.downloader.DownloaderInter;
+import com.pachira.spider.mapdb.BloomFilter;
 import com.pachira.spider.parser.Page;
 import com.pachira.spider.util.UrlUtils;
 
@@ -23,7 +22,8 @@ public class Spider {
 	private DownloaderInter downloader = null;
 	private List<Request> startRequests = null;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private HashSet<String> allLinks = null;
+//	private HashSet<String> allLinks = null;
+	private BloomFilter bloom = null;
 	
 	private Spider(PageProcessor process) {
 		this.process = process;
@@ -32,8 +32,8 @@ public class Spider {
         if (downloader == null) {
             this.downloader = new Downloader();
         }
-        if(allLinks == null){
-        	allLinks = Sets.newHashSet();
+        if(bloom == null){
+        	bloom = new BloomFilter();
         }
         if (threadpool == null || threadpool.isShutdown()) {
                 threadpool = new ThreadPoolExecutors(threadNum);
@@ -48,7 +48,9 @@ public class Spider {
         if (startRequests != null) {
             for (Request request : startRequests) {
                 queue.add(request);
-                allLinks.add(request.getUrl());
+                if(!bloom.isExit(request.getUrl())){
+                	bloom.add(request.getUrl());
+                }
             }
         }
     }
@@ -116,18 +118,21 @@ public class Spider {
 	        addTargetRequests(page, page.isNeedCycleRetry());
 		}
 		//add target requests(if request is need cycle retry, so just add current request or add response requets to the queue)
-		private void addTargetRequests(Page page, boolean isNeddCycleRetry){
+		private void addTargetRequests(Page page, boolean isNeddCycleRetry) {
 			if (!isNeddCycleRetry && CollectionUtils.isNotEmpty(page.getTargetRequests())) {
-	            for (Request request : page.getTargetRequests()) {
-	            	if(!allLinks.contains(request.getUrl())){
-	            		queue.add(request);
-	            	}
-	            }
-	        }else{
-	        	if(!allLinks.contains(request.getUrl()) && request.getReqTimes() <= UrlUtils.URL_REQUEST_TIMES_THRESHOLD){
-	        		queue.add(page.getRequest());
-	        	}
-	        }
+				for (Request request : page.getTargetRequests()) {
+					System.out.println(page);
+					if (!bloom.isExit(request.getUrl())) {
+						bloom.add(request.getUrl());
+						queue.add(page.getRequest());
+					}
+				}
+			} else {
+				if (!bloom.isExit(request.getUrl()) && request.getReqTimes() <= UrlUtils.URL_REQUEST_TIMES_THRESHOLD) {
+					bloom.add(request.getUrl());
+					queue.add(page.getRequest());
+				}
+			}
 			logger.info(String.format("LinkedBlockingQueue Size: [ %d ]",queue.size()));
 		}
 	}
