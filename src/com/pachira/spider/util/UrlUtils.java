@@ -147,5 +147,6 @@ public class UrlUtils {
         }
         return null;
     }
+    public static final int URL_REQUEST_TIMES_THRESHOLD = 3;
 
 }

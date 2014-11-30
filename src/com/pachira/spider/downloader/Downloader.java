@@ -57,7 +57,7 @@ public class Downloader implements DownloaderInter {
             request.setMethod(httpUriRequest.getMethod());
             request.putExtra(Request.STATUS_CODE, httpResponse.getStatusLine().getStatusCode());
             if(acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())){
-            	return handleResponse(request, httpResponse, charset);
+            	return handleResponse(request, httpResponse, charset, site);
             }else{
             	logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
             }
@@ -81,14 +81,14 @@ public class Downloader implements DownloaderInter {
 			return EntityUtils.toString(httpResponse.getEntity());
 		}
 	}
-	private Page handleResponse(Request request, CloseableHttpResponse httpResponse, String charset) throws IOException{
+	private Page handleResponse(Request request, CloseableHttpResponse httpResponse, String charset, WebSite site) throws IOException{
 		String content = getContent(httpResponse, charset);
 		Page page = new Page();
 		page.setUrl(request.getUrl());
 		page.setRequest(request);
 		page.setStatusCode(httpResponse.getStatusLine().getStatusCode());
 		page.setText(content);
-		page.addTargetRequests(extractor.links(content, request.getUrl()));
+		page.addTargetRequests(extractor.links(content, request.getUrl(), site));
 		return page;
 	}
 	private CloseableHttpClient getHttpClient(WebSite site) {

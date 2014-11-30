@@ -12,11 +12,19 @@ public class Request implements Serializable {
 	private String method = null;
 	//store the extras info
 	private Map<String, Object> extras = null;
+	//the current request's request times, if > 3, throw away this request! 
+	private int reqTimes = 0;
 	//store the status code
 	public static final String STATUS_CODE = "STATUS_CODE";
 	
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	public int getReqTimes() {
+		return reqTimes;
+	}
+	public void setReqTimes(int reqTimes) {
+		this.reqTimes = reqTimes;
 	}
 	public void setMethod(String method) {
 		this.method = method;

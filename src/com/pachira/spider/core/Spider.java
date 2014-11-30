@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.pachira.spider.downloader.Downloader;
 import com.pachira.spider.downloader.DownloaderInter;
 import com.pachira.spider.parser.Page;
+import com.pachira.spider.util.UrlUtils;
 
 public class Spider {
 	private Queue<Request> queue = null;
@@ -102,6 +103,7 @@ public class Spider {
 		private synchronized void processRequest(Request request) {
 			Page page = downloader.download(request, process.getSite());
 	        if (page == null) {
+	        	request.setReqTimes(request.getReqTimes() + 1);
 	        	page = new Page();
 	        	page.setNeedCycleRetry(true);
 	        	page.setRequest(request);
@@ -122,7 +124,7 @@ public class Spider {
 	            	}
 	            }
 	        }else{
-	        	if(!allLinks.contains(request.getUrl())){
+	        	if(!allLinks.contains(request.getUrl()) && request.getReqTimes() <= UrlUtils.URL_REQUEST_TIMES_THRESHOLD){
 	        		queue.add(page.getRequest());
 	        	}
 	        }

@@ -15,15 +15,15 @@ import java.util.*;
  */
 public class WebSite {
 
-    private String domain;
+    private String domain = null;
 
-    private String userAgent;
+    private String userAgent = null;
 
     private Map<String, String> defaultCookies = new LinkedHashMap<String, String>();
 
     private Table<String, String, String> cookies = HashBasedTable.create();
 
-    private String charset;
+    private String charset = null;
 
     /**
      * startUrls is the urls the crawler to start with.

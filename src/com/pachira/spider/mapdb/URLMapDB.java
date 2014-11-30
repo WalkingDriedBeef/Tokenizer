@@ -1,12 +1,6 @@
 package com.pachira.spider.mapdb;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 
 import org.mapdb.DB;
@@ -20,13 +14,16 @@ public class URLMapDB{
 	private DB DB_OBJECT = null;
 	private ConcurrentNavigableMap<String, String> URL_DB_TREEMAP = null;
 	
+	public ConcurrentNavigableMap<String, String> getURL_DB_TREEMAP() {
+		return URL_DB_TREEMAP;
+	}
+	public void setURL_DB_TREEMAP(ConcurrentNavigableMap<String, String> uRL_DB_TREEMAP) {
+		URL_DB_TREEMAP = uRL_DB_TREEMAP;
+	}
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private URLMapDB(DB DB_OBJECT, ConcurrentNavigableMap<String, String> URL_DB_TREEMAP) {
 		this.DB_OBJECT = DB_OBJECT;
 		this.URL_DB_TREEMAP = URL_DB_TREEMAP;
-	}
-	public URLMapDB() {
-		
 	}
 	public static URLMapDB create() {
 		DB db = DBMaker.newFileDB(new File(MapDBConstant.URL_DB_NAME))
@@ -82,32 +79,12 @@ public class URLMapDB{
 		}
 		DB_OBJECT.close();
 	}
-	public static String md5(String string) {
-		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-		try {
-			byte[] bytes = string.getBytes();
-			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-			messageDigest.update(bytes);
-			byte[] updateBytes = messageDigest.digest();
-			int len = updateBytes.length;
-			char myChar[] = new char[len * 2];
-			int k = 0;
-			for (int i = 0; i < len; i++) {
-				byte byte0 = updateBytes[i];
-				myChar[k++] = hexDigits[byte0 >>> 4 & 0x0f];
-				myChar[k++] = hexDigits[byte0 & 0x0f];
-			}
-			return new String(myChar);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	public static void main(String[] args) {
-		
-		String xline = "ftp://ygdy8:ygdy8@y006.dygod.org:1081/[阳光电影www.ygdy8.com].西野的恋爱与冒险.BD.720p.中文字幕.rmvb";
+	
+//	public static void main(String[] args) {
+//		String xline = "ftp://ygdy8:ygdy8@y006.dygod.org:1081/[阳光电影www.ygdy8.com].西野的恋爱与冒险.BD.720p.中文字幕.rmvb";
+//		xline = "http://www.dytt8.net/html/gndy/dyzz/20141127/46733.html";
 //		Map<String, String> map = new TreeMap<String, String>();
-		URLMapDB urlsDB = URLMapDB.create();
-		
+//		URLMapDB urlsDB = URLMapDB.create();
 //		String filename = "urls/urls.list";
 //		String charset = "gbk";
 //		try {
@@ -125,15 +102,15 @@ public class URLMapDB{
 //			}
 //			urlsDB.commit();
 //			in.close();
-			String md5xline = md5(xline);
+//			String md5xline = urlsDB.md5(xline);
 //			System.out.println(new Date().getTime());
 //			System.out.println(map.get(md5xline));
-			System.out.println(System.currentTimeMillis());
-			System.out.println(urlsDB.get(md5xline));
-			System.out.println(System.currentTimeMillis());
-			urlsDB.close();
+//			System.out.println(System.currentTimeMillis());
+//			System.out.println(urlsDB.get(md5xline));
+//			System.out.println(System.currentTimeMillis());
+//			urlsDB.close();
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-	}
+//	}
 }
