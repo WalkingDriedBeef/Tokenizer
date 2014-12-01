@@ -11,9 +11,8 @@ public class Main implements PageProcessor{
 	}
 
 	public void proccess(Page page) {
-//		pip.ps_url(page.getUrl());
-		System.out.println(page.getUrl());
-		if(page == null) return;
+		pip.ps_urls(page.getTargetRequests());
+//		System.out.println(page.getUrl());
 		StringBuilder accum = new StringBuilder();
 		int flag = 0;
 		for (Request req : page.getTargetRequests()) {
@@ -25,7 +24,6 @@ public class Main implements PageProcessor{
 			}
 		}
 		FileUtils.writefileByGBK("urls", "urls.list.1", accum.toString());
-//		FileUtils.writefileByGBK("html",  UUID.randomUUID().toString(), page.getText());
 	}
 	public static void main(String[] args) {
 		Spider.create(new Main()).thread(4).run();

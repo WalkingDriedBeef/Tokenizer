@@ -47,7 +47,7 @@ public class FileUtils{
 			}
 			FileOutputStream fos = new FileOutputStream(path+"/" + textName, true);
 			Writer out = new OutputStreamWriter(fos, "gbk");
-			out.write(sent+System.getProperty("line.separator"));
+			out.write(sent);
 			out.flush();
 			out.close();
 			fos.flush();

@@ -82,7 +82,7 @@ public class Spider {
 				}
 				// wait until new url added
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -116,12 +116,6 @@ public class Spider {
 	        	//if download current html error, so cycle retry!
 	            logger.info("html " + request.getUrl() +" is need cycle retry!");
 	        }
-//	        else{
-//	        	//if download current html success, so show this page
-//	        	synchronized (process) {
-//	        		process.proccess(page);
-//				}
-//	        }
 	        processResponse(page, page.isNeedCycleRetry(), process);
 		}
 		//add target requests(if request is need cycle retry, so just add current request or add response requets to the queue)
