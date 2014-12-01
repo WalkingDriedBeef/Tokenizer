@@ -17,3 +17,10 @@ a).开放网站数据的抓取--HttpClient接口的了解、使用、封装;
 3.基于Hash算法存储（先压缩，类似MD5）
 4.基于NoSql（MapDB），同时结合Hash算法
 5.基于布隆过滤器（Bloom Filter）的存储。
+----
+NEXT 1: PROXY
+NEXT 2: Get HTML INFO BY URL
+NEXT 3: CLEAN HTML
+NEXT 4: OTHER -- PAGERANK 
+        OTHER -- 电影推荐
+

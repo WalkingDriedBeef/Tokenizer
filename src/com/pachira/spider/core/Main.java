@@ -7,7 +7,8 @@ import com.pachira.util.FileUtils;
 public class Main implements PageProcessor{
 	private Pipeline pip = new Pipeline();
 	public WebSite getSite() {
-		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
+//		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
+		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 	}
 
 	public void proccess(Page page) {
