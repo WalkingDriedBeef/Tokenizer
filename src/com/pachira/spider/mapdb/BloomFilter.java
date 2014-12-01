@@ -93,12 +93,18 @@ public class BloomFilter {
 			this.seed = seed;
 		}
 		/**
+		 * 加快Hash效率的另一个有效途径是编写良好的自定义对象的HashCode，String的实现采用了如下的计算方法：   
+		 * for (int i = 0; i < len; i++) {      
+		 *     h = 31*h + val[off++];      
+		 * }      
+		 * hash = h;        
+		 * 这种方法HashCode的计算方法可能最早出现在Brian W. Kernighan和Dennis M. Ritchie的
+		 * 《The C Programming Language》中，被认为是性价比最高的算法（又被称为times33算法，
+		 * 因为C中乘数常量为33，JAVA中改为31），实际上，包括List在内的大多数的对象都是用这种方法计算Hash值。   
 		 * 
-		 * 方法名：hash
-		 * 作者：zhouyh
-		 * 创建时间：2014-8-30 下午01:47:10
-		 * 描述：计算hash的函数，用户可以选择其他更好的hash函数
-		 * @param value
+		 * 另一种比较特殊的hash算法称为布隆过滤器，它以牺牲细微精度为代价，换来存储空间的大量节俭，
+		 * 常用于诸如判断用户名重复、是否在黑名单上等等。  
+		 * @param str
 		 * @return
 		 */
 		public int hash(String value){
