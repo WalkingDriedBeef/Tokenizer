@@ -1,10 +1,10 @@
 package com.pachira.spider.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,28 +22,29 @@ public class Spider {
 	private DownloaderInter downloader = null;
 	private List<Request> startRequests = null;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-//	private HashSet<String> allLinks = null;
+	
 	private BloomFilter bloom = null;
 	
 	private Spider(PageProcessor process) {
 		this.process = process;
 	}
     protected void initComponent() {
-        if (downloader == null) {
-            this.downloader = new Downloader();
-        }
-        if(bloom == null){
-        	bloom = new BloomFilter();
-        }
         if (threadpool == null || threadpool.isShutdown()) {
                 threadpool = new ThreadPoolExecutors(threadNum);
+        }
+        if (downloader == null) {
+            downloader = new Downloader();
+        }
+        if(bloom == null){
+        	//thread safe
+        	bloom = new BloomFilter();
         }
         if(queue == null){
         	//thread safe
         	queue = new LinkedBlockingQueue<Request>();
         }
         if(startRequests == null){
-        	startRequests = this.process.getSite().getStartRequests();
+        	startRequests = process.getSite().getStartRequests();
         }
         if (startRequests != null) {
             for (Request request : startRequests) {
@@ -67,12 +68,15 @@ public class Spider {
 	public static Spider create(PageProcessor process) {
 		return new Spider(process);
 	}
-
+	
 	public void run() {
 		initComponent();
 		while (true) {
 			Request request = queue.poll();
 			if (request == null) {
+				/**
+				 * if thread pool's alive number is 0, and request is null, so break, and the spider over!
+				 */
 				if (threadpool.getThreadAlive() == 0) {
 					break;
 				}
@@ -91,18 +95,18 @@ public class Spider {
 		threadpool.shutdown();
 	}
 	class Task implements Runnable{
-		Request request = null;
+		private Request request = null;
 		public Task(Request request) {
 			this.request = request;
 		}
 		public void run() {
-			processRequest(this.request);
+			processRequest(request);
 		}
 		/**
 		 * process current request,then pageage the response to a page object!
 		 * @param request
 		 */
-		private synchronized void processRequest(Request request) {
+		private void processRequest(Request request) {
 			Page page = downloader.download(request, process.getSite());
 	        if (page == null) {
 	        	request.setReqTimes(request.getReqTimes() + 1);
@@ -111,25 +115,39 @@ public class Spider {
 	        	page.setRequest(request);
 	        	//if download current html error, so cycle retry!
 	            logger.info("html " + request.getUrl() +" is need cycle retry!");
-	        }else{
-	        	//if download current html success, so show this page
-	        	process.proccess(page);
 	        }
-	        addTargetRequests(page, page.isNeedCycleRetry());
+//	        else{
+//	        	//if download current html success, so show this page
+//	        	synchronized (process) {
+//	        		process.proccess(page);
+//				}
+//	        }
+	        processResponse(page, page.isNeedCycleRetry(), process);
 		}
 		//add target requests(if request is need cycle retry, so just add current request or add response requets to the queue)
-		private void addTargetRequests(Page page, boolean isNeddCycleRetry) {
-			if (!isNeddCycleRetry && CollectionUtils.isNotEmpty(page.getTargetRequests())) {
+		private void processResponse(Page page, boolean isNeedCycleRetry, PageProcessor process) {
+			/**
+			 * if not need cycle retry
+			 *  reset page's targetRequests base on bloomFilter's info
+			 * else
+			 *  if request's reqTimes <= URL_REQUEST_TIMES_THRESHOLD
+			 *   queue.add(request)
+			 */
+			if (!isNeedCycleRetry) {
+				List<Request> tmpTargetRequests = new ArrayList<Request>();
 				for (Request request : page.getTargetRequests()) {
-					System.out.println(page);
 					if (!bloom.isExit(request.getUrl())) {
 						bloom.add(request.getUrl());
-						queue.add(page.getRequest());
+						queue.add(request);
+						tmpTargetRequests.add(request);
 					}
 				}
+				page.setTargetRequests(tmpTargetRequests);
+				synchronized (process) {
+					process.proccess(page);
+				}
 			} else {
-				if (!bloom.isExit(request.getUrl()) && request.getReqTimes() <= UrlUtils.URL_REQUEST_TIMES_THRESHOLD) {
-					bloom.add(request.getUrl());
+				if (request.getReqTimes() <= UrlUtils.URL_REQUEST_TIMES_THRESHOLD) {
 					queue.add(page.getRequest());
 				}
 			}

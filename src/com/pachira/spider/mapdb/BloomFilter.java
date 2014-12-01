@@ -1,6 +1,9 @@
 package com.pachira.spider.mapdb;
 
 import java.util.BitSet;
+import java.util.List;
+
+import com.pachira.util.FileUtils;
 
 /**
  * ¿‡√˚£∫ BloomFilterTest
@@ -115,6 +118,18 @@ public class BloomFilter {
 			}
 			
 			return (cap-1) & result;
+		}
+	}
+	public static void main(String[] args) {
+		BloomFilter bloom = new BloomFilter();
+		List<String> list = FileUtils.readFile("urls/urls.list.1", "gbk");
+		for (String line : list) {
+			if(!bloom.isExit(line)){
+				System.out.println("---" + line);
+				bloom.add(line);
+			}else{
+//				System.out.println("exists: " + line);
+			}
 		}
 	}
 

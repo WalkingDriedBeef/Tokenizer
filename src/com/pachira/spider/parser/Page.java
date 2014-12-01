@@ -17,6 +17,10 @@ public class Page {
 	private boolean needCycleRetry;
 	private List<Request> targetRequests = new ArrayList<Request>();
 
+	public void setTargetRequests(List<Request> targetRequests) {
+		this.targetRequests = targetRequests;
+	}
+
 	public boolean isNeedCycleRetry() {
 		return needCycleRetry;
 	}
