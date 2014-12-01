@@ -64,7 +64,13 @@ public class Downloader implements DownloaderInter {
         } catch (IOException e) {
         	logger.error("download page error:" + request.getUrl() , e);
         } finally {
-        	
+        	if(httpResponse != null) {
+        		try {
+        			// Õ∑≈¡¨Ω”
+					EntityUtils.consume(httpResponse.getEntity());
+				} catch (IOException e) {
+				} 
+        	}
         }
         return null;
     }

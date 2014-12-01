@@ -35,6 +35,7 @@ public class DownLoaderGenerator {
     	        .register("http", PlainConnectionSocketFactory.INSTANCE)  
     	        .register("https", SSLConnectionSocketFactory.getSocketFactory())  
     	        .build();  
+    	
         connectionManager = new PoolingHttpClientConnectionManager(reg);
         //设置每个路由上的最大连接数
         connectionManager.setDefaultMaxPerRoute(100);
