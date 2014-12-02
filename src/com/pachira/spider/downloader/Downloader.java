@@ -40,40 +40,40 @@ public class Downloader implements DownloaderInter {
 	private LinksExtractor extractor = new LinksExtractor();
 	
 	public Page download(Request request, WebSite site) {
-        String charset = null;
-        Map<String, String> headers = null;
-        Set<Integer> acceptStatusCodes = null;
-        if (site != null) {
-        	acceptStatusCodes = site.getAcceptStatCode();
-            charset = site.getCharset();
-            headers = site.getHeaders();
-        }else{
-        	acceptStatusCodes = Sets.newHashSet(200);
-        }
-        CloseableHttpResponse httpResponse = null;
-        try {
-            HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
-            httpResponse = getHttpClient(site).execute(httpUriRequest);
-            request.setMethod(httpUriRequest.getMethod());
-            request.putExtra(Request.STATUS_CODE, httpResponse.getStatusLine().getStatusCode());
-            if(acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())){
-            	return handleResponse(request, httpResponse, charset, site);
-            }else{
-            	logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
-            }
-        } catch (IOException e) {
-        	logger.error("download page error:" + request.getUrl() , e);
-        } finally {
-        	if(httpResponse != null) {
-        		try {
-        			//释放连接
+		String charset = null;
+		Map<String, String> headers = null;
+		Set<Integer> acceptStatusCodes = null;
+		if (site != null) {
+			acceptStatusCodes = site.getAcceptStatCode();
+			charset = site.getCharset();
+			headers = site.getHeaders();
+		}else{
+			acceptStatusCodes = Sets.newHashSet(200);
+		}
+		CloseableHttpResponse httpResponse = null;
+		try {
+			HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
+			httpResponse = getHttpClient(site).execute(httpUriRequest);
+			request.setMethod(httpUriRequest.getMethod());
+			request.putExtra(Request.STATUS_CODE, httpResponse.getStatusLine().getStatusCode());
+			if(acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())){
+				return handleResponse(request, httpResponse, charset, site);
+			}else{
+				logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
+			}
+		} catch (IOException e) {
+			logger.error("download page error:" + request.getUrl() , e);
+		} finally {
+			if(httpResponse != null) {
+				try {
+					//释放连接
 					EntityUtils.consume(httpResponse.getEntity());
 				} catch (IOException e) {
 				} 
-        	}
-        }
-        return null;
-    }
+			}
+		}
+		return null;
+	}
 	private String getContent(CloseableHttpResponse httpResponse, String charset) throws IOException{
 		if (charset == null) {
 			byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
@@ -126,12 +126,14 @@ public class Downloader implements DownloaderInter {
 			}
 		}
 		//confirm the config of request
-		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
-				.setConnectionRequestTimeout(site.getTimeOut())
-				.setSocketTimeout(site.getTimeOut())
-				.setConnectTimeout(site.getTimeOut())
-				.setCookieSpec(CookieSpecs.BEST_MATCH);
-		requestBuilder.setConfig(requestConfigBuilder.build());
+		if(site != null){
+			RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+					.setConnectionRequestTimeout(site.getTimeOut())
+					.setSocketTimeout(site.getTimeOut())
+					.setConnectTimeout(site.getTimeOut())
+					.setCookieSpec(CookieSpecs.BEST_MATCH);
+			requestBuilder.setConfig(requestConfigBuilder.build());
+		}
 		//config the proxy info of request
 		return requestBuilder.build();
 	}

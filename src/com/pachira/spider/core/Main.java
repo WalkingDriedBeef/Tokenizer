@@ -6,13 +6,15 @@ import com.pachira.util.FileUtils;
 
 public class Main implements PageProcessor{
 	private Pipeline pip = new Pipeline();
+
 	public WebSite getSite() {
-//		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
-		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
+		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
+//		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 	}
 
 	public void proccess(Page page) {
 		pip.ps_urls(page.getTargetRequests());
+		pip.ps_content(page.getUrl(), page.getText());
 //		System.out.println(page.getUrl());
 		StringBuilder accum = new StringBuilder();
 		int flag = 0;
@@ -24,7 +26,9 @@ public class Main implements PageProcessor{
 				accum.delete(0, accum.length());
 			}
 		}
-		FileUtils.writefileByGBK("urls", "urls.list.1", accum.toString());
+		FileUtils.writefileByGBK("urls", "urls.list.2", accum.toString());
+		String tmpurl = page.getUrl().replace("/", "_").replace(".", "_").replace(":", "_");
+		FileUtils.writefileByGBK("content", tmpurl, page.getText());
 	}
 	public static void main(String[] args) {
 		Spider.create(new Main()).thread(4).run();
