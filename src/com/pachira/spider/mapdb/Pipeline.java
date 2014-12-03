@@ -38,9 +38,9 @@ public class Pipeline {
 //		}
 		System.out.println(map.size());
 		Map<String, String> mapC = pip.contMapDB.getDB_TREEMAP();
-		for(String key: mapC.keySet()){
-			System.out.println(key + "\t" + mapC.get(key));
-		}
+//		for(String key: mapC.keySet()){
+//			System.out.println(key + "\t" + mapC.get(key));
+//		}
 		System.out.println(mapC.size());
 	}
 }

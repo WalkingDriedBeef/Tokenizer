@@ -1,10 +1,14 @@
 package com.pachira.spider.core;
 
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.pachira.spider.proxy.ProxyPool;
 import com.pachira.spider.util.UrlUtils;
 
 import java.util.*;
+
+import org.apache.http.HttpHost;
 
 /**
  * Object contains setting for crawler.<br>
@@ -47,6 +51,42 @@ public class WebSite {
     private boolean useGzip = true;
     
     public static final String REFERER = "Referer";
+    
+    private HttpHost httpProxy;
+
+	private ProxyPool httpProxyPool;
+	
+	public HttpHost getHttpProxy() {
+		return httpProxy;
+	}
+	public void setHttpProxy(HttpHost httpProxy) {
+		this.httpProxy = httpProxy;
+	}
+	public WebSite setHttpProxyPool(List<String[]> httpProxyList) {
+		this.httpProxyPool=new ProxyPool(httpProxyList);
+		return this;
+	}
+	public ProxyPool getHttpProxyPool() {
+		return httpProxyPool;
+	}
+
+	public HttpHost getHttpProxyFromPool() {
+		return httpProxyPool.getProxy();
+	}
+
+    public WebSite enableHttpProxyPool() {
+        this.httpProxyPool=new ProxyPool();
+        return this;
+    }
+
+	public void returnHttpProxyToPool(HttpHost proxy,int statusCode) {
+		httpProxyPool.returnProxy(proxy,statusCode);
+	}
+	
+	public WebSite setProxyReuseInterval(int reuseInterval) {
+		this.httpProxyPool.setReuseInterval(reuseInterval);
+		return this;
+	}
 
     static {
         DEFAULT_STATUS_CODE_SET.add(200);

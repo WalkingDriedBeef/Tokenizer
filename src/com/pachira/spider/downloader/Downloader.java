@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -126,15 +127,19 @@ public class Downloader implements DownloaderInter {
 			}
 		}
 		//confirm the config of request
-		if(site != null){
-			RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+		RequestConfig.Builder requestConfigBuilder= RequestConfig.custom()
 					.setConnectionRequestTimeout(site.getTimeOut())
 					.setSocketTimeout(site.getTimeOut())
 					.setConnectTimeout(site.getTimeOut())
 					.setCookieSpec(CookieSpecs.BEST_MATCH);
 			requestBuilder.setConfig(requestConfigBuilder.build());
-		}
+			
 		//config the proxy info of request
+		if (site.getHttpProxyPool() != null && site.getHttpProxyPool().isEnable()) {
+			HttpHost host = site.getHttpProxyFromPool();
+			requestConfigBuilder.setProxy(host);
+			request.putExtra("proxy", host);
+		}
 		return requestBuilder.build();
 	}
 
