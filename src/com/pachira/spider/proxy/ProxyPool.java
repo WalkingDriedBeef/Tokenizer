@@ -4,10 +4,6 @@ import org.apache.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pachira.spider.util.FilePersistentBase;
-import com.pachira.spider.util.ProxyLocConstant;
-
-import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -36,122 +32,13 @@ public class ProxyPool {
 
     private boolean isEnable = false;
     private boolean validateWhenInit = false;
-    // private boolean isUseLastProxy = true;
-    private String proxyFilePath = ProxyLocConstant.PROXY_LOC_LASTUSE;
-
-    private FilePersistentBase fBase = new FilePersistentBase();
-
-    private Timer timer = new Timer(true);
-    private TimerTask saveProxyTask = new TimerTask() {
-
-        @Override
-        public void run() {
-            saveProxyList();
-            logger.info(allProxyStatus());
-        }
-    };
 
     public ProxyPool() {
-        this(null, true);
+    	this(null);
     }
 
     public ProxyPool(List<String[]> httpProxyList) {
-        this(httpProxyList, true);
-    }
-
-    public ProxyPool(List<String[]> httpProxyList, boolean isUseLastProxy) {
-        if (httpProxyList != null) {
-            addProxy(httpProxyList.toArray(new String[httpProxyList.size()][]));
-        }
-        if (isUseLastProxy) {
-            if (!new File(proxyFilePath).exists()) {
-                setFilePath();
-            }
-            readProxyList();
-            timer.schedule(saveProxyTask, 0, saveProxyInterval);
-        }
-    }
-
-    private void setFilePath() {
-        String tmpDir = System.getProperty("java.io.tmpdir");
-        String path = tmpDir + FilePersistentBase.PATH_SEPERATOR + "spider" + FilePersistentBase.PATH_SEPERATOR + "lastUse.proxy";
-        if (tmpDir != null && new File(tmpDir).isDirectory()) {
-            fBase.setPath(tmpDir + FilePersistentBase.PATH_SEPERATOR + "spider");
-            File f = fBase.getFile(path);
-            if (!f.exists()) {
-                try {
-                    f.createNewFile();
-
-                } catch (IOException e) {
-                    logger.error("proxy file create error", e);
-                }
-            }
-
-        } else {
-            logger.error("java tmp dir not exists");
-        }
-        this.proxyFilePath = path;
-    }
-
-    private void saveProxyList() {
-        if (allProxy.size() == 0) {
-            return;
-        }
-        try {
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fBase.getFile(proxyFilePath)));
-            os.writeObject(prepareForSaving());
-            os.close();
-            logger.info("save proxy");
-        } catch (FileNotFoundException e) {
-            logger.error("proxy file not found", e);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Map<String, Proxy> prepareForSaving() {
-        Map<String, Proxy> tmp = new HashMap<String, Proxy>();
-        for (Entry<String, Proxy> e : allProxy.entrySet()) {
-            Proxy p = e.getValue();
-            p.setFailedNum(0);
-            tmp.put(e.getKey(), p);
-        }
-        return tmp;
-    }
-
-    @SuppressWarnings("unchecked")
-	private void readProxyList() {
-        try {
-            ObjectInputStream is = new ObjectInputStream(new FileInputStream(fBase.getFile(proxyFilePath)));
-            addProxy((Map<String, Proxy>) is.readObject());
-            is.close();
-        } catch (FileNotFoundException e) {
-            logger.info("last use proxy file not found", e);
-        } catch (IOException e) {
-            // e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // e.printStackTrace();
-        }
-    }
-
-    private void addProxy(Map<String, Proxy> httpProxyMap) {
-        isEnable = true;
-        for (Entry<String, Proxy> entry : httpProxyMap.entrySet()) {
-            try {
-                if (allProxy.containsKey(entry.getKey())) {
-                    continue;
-                }
-                if (!validateWhenInit || ProxyUtils.validateProxy(entry.getValue().getHttpHost())) {
-                    entry.getValue().setFailedNum(0);
-                    entry.getValue().setReuseTimeInterval(reuseInterval);
-                    proxyQueue.add(entry.getValue());
-                    allProxy.put(entry.getKey(), entry.getValue());
-                }
-            } catch (NumberFormatException e) {
-                logger.error("HttpHost init error:", e);
-            }
-        }
-        logger.info("proxy pool size>>>>" + allProxy.size());
+    	addProxy(httpProxyList.toArray(new String[httpProxyList.size()][]));
     }
 
     public void addProxy(String[]... httpProxyList) {
@@ -173,7 +60,7 @@ public class ProxyPool {
                 logger.error("HttpHost init error:", e);
             }
         }
-        logger.info("proxy pool size>>>>" + allProxy.size());
+//        logger.info("proxy pool size>>>>" + allProxy.size());
     }
 
     public HttpHost getProxy() {
@@ -188,6 +75,8 @@ public class ProxyPool {
             Proxy p = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
             p.setLastBorrowTime(System.currentTimeMillis());
             p.borrowNumIncrement(1);
+            logger.info(p.toString());
+            logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
         } catch (InterruptedException e) {
             logger.error("get proxy error", e);
         }
@@ -299,14 +188,6 @@ public class ProxyPool {
 
     public void setSaveProxyInterval(int saveProxyInterval) {
         this.saveProxyInterval = saveProxyInterval;
-    }
-
-    public String getProxyFilePath() {
-        return proxyFilePath;
-    }
-
-    public void setProxyFilePath(String proxyFilePath) {
-        this.proxyFilePath = proxyFilePath;
     }
 
 }

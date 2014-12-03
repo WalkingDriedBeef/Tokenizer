@@ -137,6 +137,7 @@ public class Downloader implements DownloaderInter {
 		//config the proxy info of request
 		if (site.getHttpProxyPool() != null && site.getHttpProxyPool().isEnable()) {
 			HttpHost host = site.getHttpProxyFromPool();
+			logger.info("proxy httphost: " + host.getAddress() + ":" + host.getPort());
 			requestConfigBuilder.setProxy(host);
 			request.putExtra("proxy", host);
 		}

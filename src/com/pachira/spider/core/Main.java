@@ -14,8 +14,8 @@ public class Main implements PageProcessor{
 //		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 		return new WebSite()
 		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
-				.setDomain("http://www.csdn.net/")
-				.addStartRequest(new Request("http://www.csdn.net/"));
+				.setDomain("http://tieba.baidu.com/")
+				.addStartRequest(new Request("http://tieba.baidu.com/"));
 	}
 
 	public void proccess(Page page) {

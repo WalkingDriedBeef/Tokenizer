@@ -38,6 +38,7 @@ public class ProxyConfigLoad {
 
 		List<HttpHost> httphostList = new ArrayList<HttpHost>();
 		int i = 0;
+		System.in.read();
 		while (proxyPool.getIdleNum() > 2) {
 			HttpHost httphost = proxyPool.getProxy();
 			httphostList.add(httphost);
