@@ -13,9 +13,9 @@ public class Main implements PageProcessor{
 //		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
 //		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 		return new WebSite()
-		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
-				.setDomain("http://tieba.baidu.com/")
-				.addStartRequest(new Request("http://tieba.baidu.com/"));
+//		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
+				.setDomain("http://baike.baidu.com")
+				.addStartRequest(new Request("http://baike.baidu.com/shenghuo"));
 	}
 
 	public void proccess(Page page) {
@@ -27,16 +27,16 @@ public class Main implements PageProcessor{
 			flag += 1;
 			accum.append(req.getUrl()+System.getProperty("line.separator"));
 			if(flag % 1000 == 0){
-				FileUtils.writefileByGBK("urls", "urls.list.csdn", accum.toString());
+				FileUtils.writefileByGBK("urls", "urls.list.baidubaike", accum.toString());
 				accum.delete(0, accum.length());
 			}
 		}
-		FileUtils.writefileByGBK("urls", "urls.list.csdn", accum.toString());
+		FileUtils.writefileByGBK("urls", "urls.list.baidubaike", accum.toString());
 //		String tmpurl = page.getUrl().replace("/", "_").replace(".", "_").replace(":", "_");
 //		FileUtils.writefileByGBK("content", tmpurl, page.getText());
 	}
 	public static void main(String[] args) {
-		Spider.create(new Main()).thread(4).run();
+		Spider.create(new Main()).thread(10).run();
 	}
 
 }

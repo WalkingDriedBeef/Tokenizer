@@ -67,6 +67,7 @@ public class ProxyPool {
         Proxy proxy = null;
         try {
             Long time = System.currentTimeMillis();
+            logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
             proxy = proxyQueue.take();
             double costTime = (System.currentTimeMillis() - time) / 1000.0;
             if (costTime > reuseInterval) {
@@ -75,8 +76,7 @@ public class ProxyPool {
             Proxy p = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
             p.setLastBorrowTime(System.currentTimeMillis());
             p.borrowNumIncrement(1);
-            logger.info(p.toString());
-            logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
+            logger.info(String.valueOf(p.getBorrowNum()));
         } catch (InterruptedException e) {
             logger.error("get proxy error", e);
         }

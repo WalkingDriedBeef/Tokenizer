@@ -77,10 +77,11 @@ public class Downloader implements DownloaderInter {
 	}
 	private String getContent(CloseableHttpResponse httpResponse, String charset) throws IOException{
 		if (charset == null) {
+			
 			byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
 			charset = getHtmlCharset(httpResponse, contentBytes);
 			if(charset == null || StringUtils.isBlank(charset)){
-				return EntityUtils.toString(httpResponse.getEntity());
+				return new String(contentBytes);
 			}else{
 				return new String(contentBytes, charset);
 			}
