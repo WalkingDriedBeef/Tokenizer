@@ -11,6 +11,16 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 public class FileUtils{
+	public static List<String> enumFile(String dbpath, String reg){
+		List<String> list = new ArrayList<String>();
+		File file = new File(dbpath);
+		for(File f: file.listFiles()){
+			if(f.getName().matches(reg)){
+				list.add(f.getName());
+			}
+		}
+		return list;
+	}
 	/**
 	 * 写文件
 	 * @param path

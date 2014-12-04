@@ -1,5 +1,6 @@
 package com.pachira.spider.mapdb;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,39 +9,35 @@ import com.pachira.spider.util.GenUtils;
 import com.pachira.spider.util.MapDBConstant;
 
 public class Pipeline {
-	private MapDB urlMapDB = MapDB.create(MapDBConstant.URL_DB_NAME, MapDBConstant.DB_MAP);
-	private MapDB contMapDB = MapDB.create(MapDBConstant.CON_DB_NAME, MapDBConstant.DB_MAP);
-//	private Logger logger = LoggerFactory.getLogger(getClass());
-	//Persistence
-	public synchronized void ps_urls(List<Request> targets) {
+	private MapDB dbs = null;
+	private String dbPath;
+	public Pipeline(String dbPath) {
+		this.dbPath = dbPath;
+		this.dbs = new MapDB(this.dbPath);
+	}
+	public void insert_urls(String dbName, List<Request> targets) {
+		Map<String, String> map = new HashMap<String, String>();
 		for (Request request : targets) {
-			urlMapDB.put(GenUtils.md5(request.getUrl()), request.getUrl());
+			map.put(GenUtils.md5(request.getUrl()), request.getUrl());
 		}
-		urlMapDB.commit();
+		dbs.PersistKV(dbName, map);
 	}
-	public synchronized void ps_url(String line) {
-		urlMapDB.put(GenUtils.md5(line), line);
-		urlMapDB.commit();
+	public void insert_url(String dbName, String url) {
+		dbs.PersistKV(dbName, GenUtils.md5(url), url);
 	}
-	public synchronized void ps_content(String url, String content) {
-		contMapDB.put(url, content);
-		contMapDB.commit();
+	
+	public void insert_htmls(String dbName, Map<String, String> htmls) {
+		dbs.PersistKV(dbName, htmls);
 	}
-	public void close() {
-		urlMapDB.close();
-		contMapDB.close();
+	public void insert_html(String dbName, String url, String html) {
+		dbs.PersistKV(dbName, GenUtils.md5(url), html);
+	}
+	public long get_count(String dbName){
+		return dbs.GetDB(dbName).count;
 	}
 	public static void main(String[] args) {
-		Pipeline pip = new Pipeline();
-		Map<String, String> map = pip.urlMapDB.getDB_TREEMAP();
-//		for(String key: map.keySet()){
-//			System.out.println(key + "\t" + map.get(key));
-//		}
-		System.out.println(map.size());
-		Map<String, String> mapC = pip.contMapDB.getDB_TREEMAP();
-//		for(String key: mapC.keySet()){
-//			System.out.println(key + "\t" + mapC.get(key));
-//		}
-		System.out.println(mapC.size());
+		Pipeline urlPip = new Pipeline("DB");
+		System.out.println(urlPip.get_count(MapDBConstant.IASK_CONTENT_DB_NAME));
+		System.out.println(urlPip.get_count(MapDBConstant.IASK_URL_DB_NAME));
 	}
 }
