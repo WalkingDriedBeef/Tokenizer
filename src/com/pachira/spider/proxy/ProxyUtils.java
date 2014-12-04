@@ -24,13 +24,12 @@ import org.slf4j.LoggerFactory;
 
 public class ProxyUtils {
 	private static InetAddress localAddr;
-	private static String networkInterface = "eth7";
+	private static String networkInterface = "eth3";
 
 	private static final Logger logger = LoggerFactory.getLogger(ProxyUtils.class);
 	static {
 		init();
 	}
-
 	private static void init() {
 		// first way to get local IP
 		try {
@@ -81,7 +80,7 @@ public class ProxyUtils {
 			socket.bind(new InetSocketAddress(localAddr, 0));
 			InetSocketAddress endpointSocketAddr = new InetSocketAddress(p.getAddress().getHostAddress(), p.getPort());
 			socket.connect(endpointSocketAddr, 3000);
-			logger.debug("SUCCESS - connection established! Local: " + localAddr.getHostAddress() + " remote: " + p);
+			logger.info("SUCCESS - connection established! Local: " + localAddr.getHostAddress() + " remote: " + p);
 			isReachable = true;
 		} catch (IOException e) {
 			logger.warn("FAILRE - CAN not connect! Local: " + localAddr.getHostAddress() + " remote: " + p);

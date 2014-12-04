@@ -3,6 +3,7 @@ package com.pachira.spider.mapdb;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import com.pachira.spider.core.Request;
 import com.pachira.spider.util.GenUtils;
@@ -35,9 +36,15 @@ public class Pipeline {
 	public long get_count(String dbName){
 		return dbs.GetDB(dbName).count;
 	}
+	public ConcurrentMap<String, String> get_map(String dbName){
+		return dbs.GetDB(dbName).map;
+	}
 	public static void main(String[] args) {
 		Pipeline urlPip = new Pipeline("DB");
-		System.out.println(urlPip.get_count(MapDBConstant.IASK_CONTENT_DB_NAME));
+		for(String key: urlPip.get_map(MapDBConstant.IASK_CONTENT_DB_NAME).keySet()){
+			System.out.println(urlPip.get_map(MapDBConstant.IASK_CONTENT_DB_NAME).get(key));
+		}
 		System.out.println(urlPip.get_count(MapDBConstant.IASK_URL_DB_NAME));
+		System.out.println(urlPip.get_count(MapDBConstant.IASK_CONTENT_DB_NAME));
 	}
 }

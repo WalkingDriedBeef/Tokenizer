@@ -67,6 +67,7 @@ public class MapDB {
             ConcurrentMap<String, String> map = db.map;
             map.put(key, value);
             db.count = map.size();
+            db.db.commit();
             return true;
         }
     }
@@ -89,6 +90,7 @@ public class MapDB {
                 map.put(pair.getKey(), pair.getValue());
             }
             db.count = map.size();
+            db.db.commit();
             return true;
         }
     }

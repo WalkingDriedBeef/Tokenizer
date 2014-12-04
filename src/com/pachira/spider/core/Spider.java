@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +79,7 @@ public class Spider {
 				 * if thread pool's alive number is 0, and request is null, so break, and the spider over!
 				 */
 				if (threadpool.getThreadAlive() == 0) {
+					threadpool.shutdown();
 					break;
 				}
 				// wait until new url added
@@ -100,7 +102,13 @@ public class Spider {
 			this.request = request;
 		}
 		public void run() {
-			processRequest(request);
+			try {
+				processRequest(request);
+			}finally{
+				if (process.getSite().getHttpProxyPool() != null && process.getSite().getHttpProxyPool().isEnable()) {
+					process.getSite().returnHttpProxyToPool((HttpHost) request.getExtra("proxy"), (Integer) request.getExtra(Request.STATUS_CODE));
+                }
+			}
 		}
 		/**
 		 * process current request,then pageage the response to a page object!

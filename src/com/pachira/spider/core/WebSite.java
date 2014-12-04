@@ -63,7 +63,7 @@ public class WebSite {
 		this.httpProxy = httpProxy;
 	}
 	public WebSite setHttpProxyPool(List<String[]> httpProxyList) {
-		this.httpProxyPool=new ProxyPool(httpProxyList);
+		this.httpProxyPool = new ProxyPool(httpProxyList, false);
 		return this;
 	}
 	public ProxyPool getHttpProxyPool() {

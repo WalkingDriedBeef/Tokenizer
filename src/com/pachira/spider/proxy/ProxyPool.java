@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
@@ -34,10 +33,11 @@ public class ProxyPool {
     private boolean validateWhenInit = false;
 
     public ProxyPool() {
-    	this(null);
+    	this(null, false);
     }
 
-    public ProxyPool(List<String[]> httpProxyList) {
+    public ProxyPool(List<String[]> httpProxyList, boolean isValidateWhenInit) {
+    	this.validateWhenInit = isValidateWhenInit;
     	addProxy(httpProxyList.toArray(new String[httpProxyList.size()][]));
     }
 
@@ -73,10 +73,9 @@ public class ProxyPool {
             if (costTime > reuseInterval) {
                 logger.info("get proxy time >>>> " + costTime);
             }
-            Proxy p = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
-            p.setLastBorrowTime(System.currentTimeMillis());
-            p.borrowNumIncrement(1);
-            logger.info(String.valueOf(p.getBorrowNum()));
+            proxy = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
+            proxy.setLastBorrowTime(System.currentTimeMillis());
+            proxy.borrowNumIncrement(1);
         } catch (InterruptedException e) {
             logger.error("get proxy error", e);
         }
@@ -98,6 +97,7 @@ public class ProxyPool {
                 p.setFailedErrorType(new ArrayList<Integer>());
                 p.recordResponse();
                 p.successNumIncrement(1);
+                logger.info(p.toString());
                 break;
             case Proxy.ERROR_403:
                 // banned,try longer interval
@@ -136,14 +136,6 @@ public class ProxyPool {
         } catch (InterruptedException e) {
             logger.warn("proxyQueue return proxy error", e);
         }
-    }
-
-    public String allProxyStatus() {
-        String re = "all proxy info >>>> \n";
-        for (Entry<String, Proxy> entry : allProxy.entrySet()) {
-            re += entry.getValue().toString() + "\n";
-        }
-        return re;
     }
 
     public int getIdleNum() {

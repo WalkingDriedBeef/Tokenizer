@@ -12,7 +12,7 @@ import com.pachira.util.FileUtils;
 public class GetProxyIP {
 	public static void main(String[] args) throws IOException {
 		String url = "http://www.xici.net.co/nn/1";
-		int pages = 180;
+		int pages = 1;
 		//http://www.xici.net.co/nn/1 -- 186
 		for (int i = 0; i < pages; i++) {
 			Document doc = Jsoup.connect(url).get();

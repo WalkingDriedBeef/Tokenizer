@@ -32,7 +32,7 @@ public class ProxyConfigLoad {
 	}
 
 	public static void main(String[] args) throws IOException {
-		ProxyPool proxyPool = new ProxyPool(getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT));
+		ProxyPool proxyPool = new ProxyPool(getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT), false);
 		proxyPool.setReuseInterval(10000);
 		// proxyPool.saveProxyList();
 
@@ -45,11 +45,11 @@ public class ProxyConfigLoad {
 			logger.info("borrow object>>>>" + i + ">>>>" + httphostList.get(i).toString());
 			i++;
 		}
-		System.out.println(proxyPool.allProxyStatus());
+//		System.out.println(proxyPool.allProxyStatus());
 		for (i = 0; i < httphostList.size(); i++) {
 			proxyPool.returnProxy(httphostList.get(i), 200);
 			logger.info("return object>>>>" + i + ">>>>" + httphostList.get(i).toString());
 		}
-		System.out.println(proxyPool.allProxyStatus());
+//		System.out.println(proxyPool.allProxyStatus());
 	}
 }
