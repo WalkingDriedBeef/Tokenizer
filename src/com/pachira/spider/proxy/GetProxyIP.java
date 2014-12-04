@@ -7,25 +7,21 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.pachira.util.FileUtils;
-
 public class GetProxyIP {
 	public static void main(String[] args) throws IOException {
-		String url = "http://www.xici.net.co/nn/1";
+		String url = "http://www.youdaili.net/Daili/http/2784.html";
 		int pages = 1;
 		//http://www.xici.net.co/nn/1 -- 186
 		for (int i = 0; i < pages; i++) {
 			Document doc = Jsoup.connect(url).get();
-			String reg = "table#ip_list>tbody>tr.odd";
+			String reg = "div.cont_font p";
 			Elements eles = doc.select(reg);
-			StringBuffer accom = new StringBuffer();
 			for(Element ele: eles){
-				Elements tdeles = ele.select("td");
-				if(tdeles.size() >= 4){
-					accom.append(tdeles.get(2).text() + ":" + tdeles.get(3).text() + System.getProperty("line.separator"));
+				for(String key : ele.toString().split("<br />")){
+					System.out.println(key.trim().split("@")[0]);
 				}
 			}
-			FileUtils.writefileByGBK("data", "proxy.txt", accom.toString());
+//			FileUtils.writefileByGBK("data", "proxy.txt", accom.toString());
 		}
 	}
 
