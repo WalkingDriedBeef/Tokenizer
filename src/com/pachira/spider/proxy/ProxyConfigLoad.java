@@ -25,6 +25,7 @@ public class ProxyConfigLoad {
 			while ((line = br.readLine()) != null) { 
 				proxyList.add(new String[] { line.split(":")[0],line.split(":")[1] });
 			}
+			br.close();
 		} catch (IOException e) {
 			logger.error("load proxy ip error!");
 		}
