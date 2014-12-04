@@ -25,6 +25,7 @@ public class Spider {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private BloomFilter bloom = null;
+	private WebSite site = null;
 	
 	private Spider(PageProcessor process) {
 		this.process = process;
@@ -54,6 +55,9 @@ public class Spider {
                 	bloom.add(request.getUrl());
                 }
             }
+        }
+        if(site == null){
+        	site = process.getSite();
         }
     }
 	public int getThreadNum() {
@@ -105,8 +109,8 @@ public class Spider {
 			try {
 				processRequest(request);
 			}finally{
-				if (process.getSite().getHttpProxyPool() != null && process.getSite().getHttpProxyPool().isEnable()) {
-					process.getSite().returnHttpProxyToPool((HttpHost) request.getExtra("proxy"), (Integer) request.getExtra(Request.STATUS_CODE));
+				if (site.getHttpProxyPool() != null && site.getHttpProxyPool().isEnable()) {
+					site.returnHttpProxyToPool((HttpHost) request.getExtra("proxy"), (Integer) request.getExtra(Request.STATUS_CODE));
                 }
 			}
 		}
@@ -115,7 +119,7 @@ public class Spider {
 		 * @param request
 		 */
 		private void processRequest(Request request) {
-			Page page = downloader.download(request, process.getSite());
+			Page page = downloader.download(request, site);
 	        if (page == null) {
 	        	request.setReqTimes(request.getReqTimes() + 1);
 	        	page = new Page();
