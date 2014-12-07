@@ -18,13 +18,13 @@ public class Main implements PageProcessor{
 //		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 		return new WebSite()
 		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
-				.setDomain("http://www.iteye.com")
-				.addStartRequest(new Request("http://www.iteye.com/ask"));
+				.setDomain("http://bbs.tianya.cn/")
+				.addStartRequest(new Request("http://bbs.tianya.cn/"));
 	}
 
 	public void proccess(Page page) {
-		pip.insert_urls(MapDBConstant.IASK_URL_DB_NAME, page.getTargetRequests());
-		pip.insert_html(MapDBConstant.IASK_CONTENT_DB_NAME, GenUtils.md5(page.getUrl()), page.getUrl()+System.getProperty("line.separator") + page.getText());
+		pip.insert_urls(MapDBConstant.TIANYA_URL_DB_NAME, page.getTargetRequests());
+		pip.insert_html(MapDBConstant.TIANYA_CONTENT_DB_NAME, GenUtils.md5(page.getUrl()), page.getUrl()+System.getProperty("line.separator") + page.getText());
 		
 		StringBuilder accum = new StringBuilder();
 		int flag = 0;
@@ -32,14 +32,14 @@ public class Main implements PageProcessor{
 			flag += 1;
 			accum.append(req.getUrl()+System.getProperty("line.separator"));
 			if(flag % 1000 == 0){
-				FileUtils.writefileByGBK("urls", "urls.list.sinaAsk", accum.toString());
+				FileUtils.writefileByGBK("urls", "urls.list.tianya", accum.toString());
 				accum.delete(0, accum.length());
 			}
 		}
-		FileUtils.writefileByGBK("urls", "urls.list.sinaAsk", accum.toString());
+		FileUtils.writefileByGBK("urls", "urls.list.tianya", accum.toString());
 	}
 	public static void main(String[] args) {
-		Spider.create(new Main()).thread(1).run();
+		Spider.create(new Main()).thread(5).run();
 	}
 
 }

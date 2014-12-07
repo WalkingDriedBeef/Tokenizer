@@ -81,8 +81,9 @@ public class Spider {
 			if (request == null) {
 				/**
 				 * if thread pool's alive number is 0, and request is null, so break, and the spider over!
+				 * if httpproxypool's alive number is 0, so break, and the spider over!
 				 */
-				if (threadpool.getThreadAlive() == 0) {
+				if (threadpool.getThreadAlive() == 0 || site.getHttpProxyPool().getIdleNum() == 0) {
 					threadpool.shutdown();
 					break;
 				}

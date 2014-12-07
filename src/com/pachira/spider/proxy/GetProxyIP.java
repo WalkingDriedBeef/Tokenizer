@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 
 public class GetProxyIP {
 	public static void main(String[] args) throws IOException {
-		String url = "http://www.youdaili.net/Daili/http/2784.html";
+		String url = "http://www.youdaili.net/Daili/http/2799.html";
 		int pages = 1;
 		//http://www.xici.net.co/nn/1 -- 186
 		for (int i = 0; i < pages; i++) {
