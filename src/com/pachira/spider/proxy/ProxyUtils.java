@@ -80,8 +80,8 @@ public class ProxyUtils {
 			socket.bind(new InetSocketAddress(localAddr, 0));
 			InetSocketAddress endpointSocketAddr = new InetSocketAddress(p.getAddress().getHostAddress(), p.getPort());
 			socket.connect(endpointSocketAddr, 3000);
-			logger.info("SUCCESS - connection established! Local: " + localAddr.getHostAddress() + " remote: " + p);
 			isReachable = true;
+			logger.info("SUCCESS - connection established! Local: " + localAddr.getHostAddress() + " remote: " + p);
 		} catch (IOException e) {
 			logger.warn("FAILRE - CAN not connect! Local: " + localAddr.getHostAddress() + " remote: " + p);
 		} finally {
@@ -98,7 +98,7 @@ public class ProxyUtils {
 
 	private static String getNetworkInterface() {
 
-		String networkInterfaceName = ">>>> modify networkInterface in us.codecraft.webmagic.utils.ProxyUtils";
+		String networkInterfaceName = ">>>> modify networkInterface";
 		Enumeration<NetworkInterface> enumeration = null;
 		try {
 			enumeration = NetworkInterface.getNetworkInterfaces();

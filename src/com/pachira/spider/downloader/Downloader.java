@@ -142,6 +142,7 @@ public class Downloader implements DownloaderInter {
 			requestConfigBuilder.setProxy(host);
 			request.putExtra("proxy", host);
 		}
+		//if httpProxy object is null, what should i do? return ? or use local ip go on?
 		return requestBuilder.build();
 	}
 
