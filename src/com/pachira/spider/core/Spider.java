@@ -45,8 +45,11 @@ public class Spider {
         	//thread safe
         	queue = new LinkedBlockingQueue<Request>();
         }
+        if(site == null){
+        	site = process.getSite();
+        }
         if(startRequests == null){
-        	startRequests = process.getSite().getStartRequests();
+        	startRequests = site.getStartRequests();
         }
         if (startRequests != null) {
             for (Request request : startRequests) {
@@ -55,9 +58,6 @@ public class Spider {
                 	bloom.add(request.getUrl());
                 }
             }
-        }
-        if(site == null){
-        	site = process.getSite();
         }
     }
 	public int getThreadNum() {
@@ -77,13 +77,18 @@ public class Spider {
 	public void run() {
 		initComponent();
 		while (true) {
+			//validte proxypool is null or alive proxy is zero
+			if (site.getHttpProxyPool() != null && site.getHttpProxyPool().getIdleNum() == 0) {
+				logger.warn("http proxy pool is null, please check, or don't use proxy pool!");
+				break;
+			}
 			Request request = queue.poll();
 			if (request == null) {
 				/**
 				 * if thread pool's alive number is 0, and request is null, so break, and the spider over!
 				 * if httpproxypool's alive number is 0, so break, and the spider over!
 				 */
-				if (threadpool.getThreadAlive() == 0 || site.getHttpProxyPool().getIdleNum() == 0) {
+				if (threadpool.getThreadAlive() == 0) {
 					threadpool.shutdown();
 					break;
 				}

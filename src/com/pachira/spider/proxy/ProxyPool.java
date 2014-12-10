@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Pooled Proxy Object
@@ -22,7 +22,7 @@ public class ProxyPool {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private BlockingQueue<Proxy> proxyQueue = new DelayQueue<Proxy>();
+    private BlockingQueue<Proxy> proxyQueue = new LinkedBlockingQueue<Proxy>();
     private Map<String, Proxy> allProxy = new ConcurrentHashMap<String, Proxy>();
 
     private int reuseInterval = 1500;// ms
@@ -33,7 +33,6 @@ public class ProxyPool {
     private boolean validateWhenInit = false;
 
     public ProxyPool() {
-    	this(null, false);
     }
 
     public ProxyPool(List<String[]> httpProxyList, boolean isValidateWhenInit) {
@@ -54,8 +53,6 @@ public class ProxyPool {
                     proxyQueue.add(p);
                     allProxy.put(s[0], p);
                 }
-            } catch (NumberFormatException e) {
-                logger.error("HttpHost init error:", e);
             } catch (UnknownHostException e) {
                 logger.error("HttpHost init error:", e);
             }
@@ -65,23 +62,20 @@ public class ProxyPool {
 
     public HttpHost getProxy() {
         Proxy proxy = null;
-        try {
-            Long time = System.currentTimeMillis();
-            logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
-            proxy = proxyQueue.take();
-            double costTime = (System.currentTimeMillis() - time) / 1000.0;
-            if (costTime > reuseInterval) {
-                logger.info("get proxy time >>>> " + costTime);
-            }
-            proxy = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
-            proxy.setLastBorrowTime(System.currentTimeMillis());
-            proxy.borrowNumIncrement(1);
-        } catch (InterruptedException e) {
-            logger.error("get proxy error", e);
-        }
-        if (proxy == null) {
-            throw new NoSuchElementException();
-        }
+        try{
+        	Long time = System.currentTimeMillis();
+    		logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
+    		proxy = proxyQueue.take();
+    		double costTime = (System.currentTimeMillis() - time) / 1000.0;
+    		if (costTime > reuseInterval) {
+    		    logger.info("get proxy time >>>> " + costTime);
+    		}
+    		proxy = allProxy.get(proxy.getHttpHost().getAddress().getHostAddress());
+    		proxy.setLastBorrowTime(System.currentTimeMillis());
+    		proxy.borrowNumIncrement(1);
+        }catch (Exception e) {
+        	logger.error("get proxy error!");
+		}
         return proxy.getHttpHost();
     }
 

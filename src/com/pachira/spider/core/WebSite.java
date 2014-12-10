@@ -55,7 +55,7 @@ public class WebSite {
 	private ProxyPool httpProxyPool;
 	
 	public WebSite setHttpProxyPool(List<String[]> httpProxyList) {
-		this.httpProxyPool = new ProxyPool(httpProxyList, true);
+		httpProxyPool = new ProxyPool(httpProxyList, true);
 		return this;
 	}
 	public ProxyPool getHttpProxyPool() {
@@ -72,15 +72,6 @@ public class WebSite {
 	
     static {
         DEFAULT_STATUS_CODE_SET.add(200);
-    }
-
-    /**
-     * new a Site
-     *
-     * @return new site
-     */
-    public static WebSite create() {
-        return new WebSite();
     }
 
     /**
