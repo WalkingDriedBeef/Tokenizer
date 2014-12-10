@@ -87,13 +87,11 @@ public class Spider {
 				logger.warn("http proxy pool is null, please check, or don't use proxy pool!");
 				break;
 			}
-			logger.info(String.format("TO DO Queue Size: [ %d ]", queue.size()));
 			Request request = queue.poll();
 			if (request == null) {
 				// if thread pool's alive number is 0, and request is null, so
 				// break, and the spider over!
 				if (threadpool.getThreadAlive() == 0) {
-					threadpool.shutdown();
 					break;
 				}
 				// wait until new url added
@@ -121,7 +119,11 @@ public class Spider {
 				processRequest(request);
 			} finally {
 				if (site.getHttpProxyPool() != null && site.getHttpProxyPool().isEnable()) {
-					site.returnHttpProxyToPool( (HttpHost) request.getExtra("proxy"), (Integer) request.getExtra(Request.STATUS_CODE));
+					HttpHost host = (HttpHost) request.getExtra("proxy");
+					Object status = request.getExtra(Request.STATUS_CODE);
+					if(host != null && status != null){
+						site.returnHttpProxyToPool( (HttpHost) request.getExtra("proxy"), (Integer) request.getExtra(Request.STATUS_CODE));
+					}
 				}
 			}
 		}
@@ -168,7 +170,7 @@ public class Spider {
 					queue.add(page.getRequest());
 				}
 			}
-//			logger.info(String.format("LinkedBlockingQueue Size: [ %d ]", queue.size()));
+			logger.info(String.format("To do queue size: [ %d ]", queue.size()));
 		}
 	}
 }

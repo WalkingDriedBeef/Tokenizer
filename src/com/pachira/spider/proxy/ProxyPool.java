@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.DelayQueue;
 
 /**
  * Pooled Proxy Object
@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ProxyPool {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private BlockingQueue<Proxy> proxyQueue = new LinkedBlockingQueue<Proxy>();
+    private BlockingQueue<Proxy> proxyQueue = new DelayQueue<Proxy>();
     private Map<String, Proxy> allProxy = new ConcurrentHashMap<String, Proxy>();
     private int reuseInterval = 1500;// ms
 	private int reviveTime = 2 * 60 * 60 * 1000;// ms

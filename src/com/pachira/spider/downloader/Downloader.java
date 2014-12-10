@@ -63,33 +63,41 @@ public class Downloader implements DownloaderInter {
 				logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
 			}
 		} catch (IOException e) {
-			logger.error("download page error:" + request.getUrl() , e);
+			logger.error("download page error: " + request.getUrl());
+			logger.error("error message: " + e.getMessage());
 		} finally {
 			if(httpResponse != null) {
 				try {
 					// Õ∑≈¡¨Ω”
-					EntityUtils.consume(httpResponse.getEntity());
+					if(httpResponse != null){
+						httpResponse.getEntity().getContent().close();
+						httpResponse.close();
+					}
 				} catch (IOException e) {
 				} 
 			}
 		}
 		return null;
 	}
-	private String getContent(CloseableHttpResponse httpResponse, String charset) throws IOException{
-		if (charset == null) {
-			
-			byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
-			charset = getHtmlCharset(httpResponse, contentBytes);
-			if(charset == null || StringUtils.isBlank(charset)){
-				return new String(contentBytes);
-			}else{
-				return new String(contentBytes, charset);
+	private String getContent(CloseableHttpResponse httpResponse, String charset){
+		try {
+			if (charset == null) {
+				byte[] contentBytes = EntityUtils.toByteArray(httpResponse.getEntity());
+				charset = getHtmlCharset(httpResponse, contentBytes);
+				if(charset == null || StringUtils.isBlank(charset)){
+					return new String(contentBytes);
+				}else{
+					return new String(contentBytes, charset);
+				}
+			} else {
+				return EntityUtils.toString(httpResponse.getEntity());
 			}
-		} else {
-			return EntityUtils.toString(httpResponse.getEntity());
+		} catch (Exception e) {
 		}
+		return null;
 	}
-	private Page handleResponse(Request request, CloseableHttpResponse httpResponse, String charset, WebSite site) throws IOException{
+	private Page handleResponse(Request request, CloseableHttpResponse httpResponse, String charset, WebSite site){
+		if(request == null || httpResponse == null || site == null)return null;
 		String content = getContent(httpResponse, charset);
 		Page page = new Page();
 		page.setUrl(request.getUrl());
