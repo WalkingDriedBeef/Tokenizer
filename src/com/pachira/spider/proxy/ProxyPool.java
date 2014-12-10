@@ -21,50 +21,38 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ProxyPool {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
     private BlockingQueue<Proxy> proxyQueue = new LinkedBlockingQueue<Proxy>();
     private Map<String, Proxy> allProxy = new ConcurrentHashMap<String, Proxy>();
-
     private int reuseInterval = 1500;// ms
-    private int reviveTime = 2 * 60 * 60 * 1000;// ms
-    private int saveProxyInterval = 10 * 60 * 1000;// ms
-
-    private boolean isEnable = false;
-    private boolean validateWhenInit = false;
-
-    public ProxyPool() {
-    }
+	private int reviveTime = 2 * 60 * 60 * 1000;// ms
+	private boolean isEnable = false;
 
     public ProxyPool(List<String[]> httpProxyList, boolean isValidateWhenInit) {
-    	this.validateWhenInit = isValidateWhenInit;
-    	addProxy(httpProxyList.toArray(new String[httpProxyList.size()][]));
+    	addProxy(isValidateWhenInit, httpProxyList.toArray(new String[httpProxyList.size()][]));
     }
 
-    public void addProxy(String[]... httpProxyList) {
-        isEnable = true;
-        for (String[] s : httpProxyList) {
-            try {
-                if (allProxy.containsKey(s[0])) {
-                    continue;
-                }
-                HttpHost item = new HttpHost(InetAddress.getByName(s[0]), Integer.valueOf(s[1]));
-                if (!validateWhenInit || ProxyUtils.validateProxy(item)) {
-                    Proxy p = new Proxy(item, reuseInterval);
-                    proxyQueue.add(p);
-                    allProxy.put(s[0], p);
-                }
-            } catch (UnknownHostException e) {
-                logger.error("HttpHost init error:", e);
-            }
-        }
-//        logger.info("proxy pool size>>>>" + allProxy.size());
-    }
+	public void addProxy(boolean validateWhenInit, String[]... httpProxyList) {
+		isEnable = true;
+		for (String[] s : httpProxyList) {
+			try {
+				if (allProxy.containsKey(s[0])) continue;
+				HttpHost item = new HttpHost(InetAddress.getByName(s[0]), Integer.valueOf(s[1]));
+				if (!validateWhenInit || ProxyUtils.validateProxy(item)) {
+					Proxy p = new Proxy(item, reuseInterval);
+					proxyQueue.add(p);
+					allProxy.put(s[0], p);
+				}
+			} catch (UnknownHostException e) {
+				logger.error("HttpHost init error:", e);
+			}
+		}
+	}
 
-    public HttpHost getProxy() {
+    public synchronized HttpHost getProxy() {
         Proxy proxy = null;
         try{
         	Long time = System.currentTimeMillis();
-    		logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
+        	logger.info("proxy pool size: [ " + proxyQueue.size() + "]");
     		proxy = proxyQueue.take();
     		double costTime = (System.currentTimeMillis() - time) / 1000.0;
     		if (costTime > reuseInterval) {
@@ -80,6 +68,7 @@ public class ProxyPool {
     }
 
     public void returnProxy(HttpHost host, int statusCode) {
+    	if(host == null) return;
         Proxy p = allProxy.get(host.getAddress().getHostAddress());
         if (p == null) {
             return;
@@ -136,14 +125,6 @@ public class ProxyPool {
         return proxyQueue.size();
     }
 
-    public int getReuseInterval() {
-        return reuseInterval;
-    }
-
-    public void setReuseInterval(int reuseInterval) {
-        this.reuseInterval = reuseInterval;
-    }
-
     public void enable(boolean isEnable) {
         this.isEnable = isEnable;
     }
@@ -151,29 +132,20 @@ public class ProxyPool {
     public boolean isEnable() {
         return isEnable;
     }
+    public int getReuseInterval() {
+		return reuseInterval;
+	}
 
-    public int getReviveTime() {
-        return reviveTime;
-    }
+	public void setReuseInterval(int reuseInterval) {
+		this.reuseInterval = reuseInterval;
+	}
+	
+	public int getReviveTime() {
+		return reviveTime;
+	}
 
-    public void setReviveTime(int reviveTime) {
-        this.reviveTime = reviveTime;
-    }
-
-    public boolean isValidateWhenInit() {
-        return validateWhenInit;
-    }
-
-    public void validateWhenInit(boolean validateWhenInit) {
-        this.validateWhenInit = validateWhenInit;
-    }
-
-    public int getSaveProxyInterval() {
-        return saveProxyInterval;
-    }
-
-    public void setSaveProxyInterval(int saveProxyInterval) {
-        this.saveProxyInterval = saveProxyInterval;
-    }
+	public void setReviveTime(int reviveTime) {
+		this.reviveTime = reviveTime;
+	}
 
 }

@@ -39,7 +39,7 @@ public class Main implements PageProcessor{
 		FileUtils.writefileByGBK("urls", "urls.list.tianya", accum.toString());
 	}
 	public static void main(String[] args) {
-		Spider.create(new Main()).thread(6).run();
+		Spider.create(new Main()).thread(1).run();
 	}
 
 }

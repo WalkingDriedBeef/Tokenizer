@@ -34,7 +34,7 @@ public class ProxyUtils {
 		// first way to get local IP
 		try {
 			localAddr = InetAddress.getLocalHost();
-			logger.info("local IP:" + localAddr.getHostAddress());
+//			logger.info("local IP:" + localAddr.getHostAddress());
 		} catch (UnknownHostException e) {
 			logger.info("try again\n");
 		}
