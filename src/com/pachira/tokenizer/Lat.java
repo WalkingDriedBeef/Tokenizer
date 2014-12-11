@@ -34,11 +34,11 @@ public class Lat {
 			}
 		}
 		//pruning
-		for(Integer i: lats.keySet()){
-			if(lats.get(i).size() > 1){
-				lats.get(i).remove(0);
-			}
-		}
+//		for(Integer i: lats.keySet()){
+//			if(lats.get(i).size() > 1){
+//				lats.get(i).remove(0);
+//			}
+//		}
 //		for(Integer i: lats.keySet()){
 //			for(Node node: lats.get(i)){
 //				System.out.println(i+"\t" + node);
@@ -111,14 +111,11 @@ public class Lat {
 	public static void main(String[] args) {
 		System.out.println(new Date());
 		Dict dict = new Dict("data/universal.dict");
-		String sent = "笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑笔记本电脑";
+		String sent = "硕士研究生产";
+//		sent = "他很高兴高采烈";
 		Lat lat = new Lat();
 		System.out.println(new Date());
 		System.out.println(lat.segmenter(dict, sent));
 		System.out.println(new Date());
-//		Dict dict = new Dict("data/universal.dict");
-//		String input = "data/XIYOUJI.txt";
-//		Lat lat = new Lat();
-//		lat.tokenizer(input, lat, dict);
 	}
 }

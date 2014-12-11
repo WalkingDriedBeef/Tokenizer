@@ -29,5 +29,6 @@ public class Constants {
 	//内部凝固度信息阈值
 	public static double DEGREE_OF_COAGULATION = 1000.0;
 	//停用词
-	public static HashMap<String, String> STOP_WORDS = getStopWords();
+//	public static HashMap<String, String> STOP_WORDS = getStopWords();
+	public static HashMap<String, String> STOP_WORDS = null;
 }
