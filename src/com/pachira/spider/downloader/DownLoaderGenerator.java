@@ -38,14 +38,9 @@ public class DownLoaderGenerator {
     	
         connectionManager = new PoolingHttpClientConnectionManager(reg);
         //设置每个路由上的最大连接数
-        connectionManager.setDefaultMaxPerRoute(100);
+        connectionManager.setDefaultMaxPerRoute(20);
+        connectionManager.setMaxTotal(200);
     }
-    public DownLoaderGenerator setPoolSize(int poolSize) {
-    	//设置连接池最大连接数
-        connectionManager.setMaxTotal(poolSize);
-        return this;
-    }
-
     /**
      * 获得一个连接
      * @param site
