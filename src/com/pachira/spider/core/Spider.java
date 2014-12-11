@@ -1,5 +1,7 @@
 package com.pachira.spider.core;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -85,7 +87,6 @@ public class Spider {
 			// validte proxypool is null or alive proxy is zero
 			if (site.getHttpProxyPool() != null && site.getHttpProxyPool().getIdleNum() == 0) {
 				logger.warn("http proxy pool is null, please check, or don't use proxy pool!");
-				break;
 			}
 			Request request = queue.poll();
 			if (request == null) {
@@ -105,9 +106,25 @@ public class Spider {
 				threadpool.execute(new Task(request));
 			}
 		}
+		close();
+	}
+
+	public void close() {
+		destroyEach(downloader);
+		destroyEach(process);
 		threadpool.shutdown();
 	}
 
+	private void destroyEach(Object object) {
+		if (object instanceof Closeable) {
+			try {
+				((Closeable) object).close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	class Task implements Runnable {
 		private Request request = null;
 

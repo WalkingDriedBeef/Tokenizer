@@ -44,11 +44,12 @@ public class Downloader implements DownloaderInter {
 		String charset = null;
 		Map<String, String> headers = null;
 		Set<Integer> acceptStatusCodes = null;
+		int statusCode = 0;
 		if (site != null) {
 			acceptStatusCodes = site.getAcceptStatCode();
 			charset = site.getCharset();
 			headers = site.getHeaders();
-		}else{
+		} else {
 			acceptStatusCodes = Sets.newHashSet(200);
 		}
 		CloseableHttpResponse httpResponse = null;
@@ -56,28 +57,29 @@ public class Downloader implements DownloaderInter {
 			HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
 			httpResponse = getHttpClient(site).execute(httpUriRequest);
 			request.setMethod(httpUriRequest.getMethod());
-			request.putExtra(Request.STATUS_CODE, httpResponse.getStatusLine().getStatusCode());
-			if(acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())){
+			statusCode = httpResponse.getStatusLine().getStatusCode();
+			request.putExtra(Request.STATUS_CODE, statusCode);
+			if (acceptStatusCodes.contains(httpResponse.getStatusLine().getStatusCode())) {
 				return handleResponse(request, httpResponse, charset, site);
-			}else{
-				logger.warn("download page " + request.getUrl() + " error, status code is: {}", httpResponse.getStatusLine().getStatusCode());
+			} else {
+				logger.warn("status code: " +  httpResponse.getStatusLine().getStatusCode() + "\t" + request.getUrl());
+				return null;
 			}
 		} catch (IOException e) {
-			logger.error("download page error: " + request.getUrl());
-			logger.error("error message: " + e.getMessage());
+			request.putExtra(Request.STATUS_CODE, statusCode);
+			logger.error("error message: " + e.getMessage() + "\t" + request.getUrl());
+			return null;
 		} finally {
-			if(httpResponse != null) {
+			if (httpResponse != null) {
+				request.putExtra(Request.STATUS_CODE, statusCode);
 				try {
-					// Õ∑≈¡¨Ω”
-					if(httpResponse != null){
-						httpResponse.getEntity().getContent().close();
-						httpResponse.close();
-					}
+					// ensure the connection is released back to pool
+					EntityUtils.consume(httpResponse.getEntity());
 				} catch (IOException e) {
-				} 
+					logger.error("close http response error.");
+				}
 			}
 		}
-		return null;
 	}
 	private String getContent(CloseableHttpResponse httpResponse, String charset){
 		try {
@@ -93,6 +95,7 @@ public class Downloader implements DownloaderInter {
 				return EntityUtils.toString(httpResponse.getEntity());
 			}
 		} catch (Exception e) {
+			logger.warn("get content error!");
 		}
 		return null;
 	}
@@ -146,7 +149,7 @@ public class Downloader implements DownloaderInter {
 		//config the proxy info of request
 		if (site.getHttpProxyPool() != null && site.getHttpProxyPool().isEnable()) {
 			HttpHost host = site.getHttpProxyFromPool();
-			logger.info("proxy httphost: " + host.getAddress() + ":" + host.getPort());
+//			logger.info("proxy httphost: " + host.getAddress() + ":" + host.getPort());
 			requestConfigBuilder.setProxy(host);
 			request.putExtra("proxy", host);
 		}
@@ -176,7 +179,7 @@ public class Downloader implements DownloaderInter {
 		}
 		throw new IllegalArgumentException("Illegal HTTP Method " + method);
 	}
-	protected String getHtmlCharset(HttpResponse httpResponse, byte[] contentBytes) throws UnsupportedEncodingException  {
+	protected String getHtmlCharset(HttpResponse httpResponse, byte[] contentBytes){
         String charset = null;
         // 1. encoding in http header Content-Type
         String value = httpResponse.getEntity().getContentType().getValue();
@@ -187,7 +190,12 @@ public class Downloader implements DownloaderInter {
         }
         // use default charset to decode first time
         Charset defaultCharset = Charset.defaultCharset();
-        String content = new String(contentBytes, defaultCharset.name());
+        String content= "";;
+		try {
+			content = new String(contentBytes, defaultCharset.name());
+		} catch (UnsupportedEncodingException e) {
+			logger.warn("unsupported encoding exception!");
+		}
         // 2.charset in meta
         if (StringUtils.isNotEmpty(content)) {
             Document document = Jsoup.parse(content);
