@@ -24,6 +24,7 @@ public class Spider {
 	private DownloaderInter downloader = null;
 	private List<Request> startRequests = null;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Task task = null;
 
 	private BloomFilter bloom = null;
 	private WebSite site = null;
@@ -60,6 +61,9 @@ public class Spider {
 					bloom.add(request.getUrl());
 				}
 			}
+		}
+		if(task == null){
+			task = new Task();
 		}
 	}
 
@@ -103,7 +107,8 @@ public class Spider {
 				}
 				logger.info("wait unitil new url added!");
 			} else {
-				threadpool.execute(new Task(request));
+				task.setRequest(request);
+				threadpool.execute(task);
 			}
 		}
 		close();
@@ -128,9 +133,17 @@ public class Spider {
 	class Task implements Runnable {
 		private Request request = null;
 
-		public Task(Request request) {
+		public Request getRequest() {
+			return request;
+		}
+
+		public void setRequest(Request request) {
 			this.request = request;
 		}
+
+		public Task() {
+		}
+		
 		public void run() {
 			try {
 				processRequest(request);

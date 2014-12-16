@@ -17,7 +17,7 @@ public class Main implements PageProcessor{
 //		return new WebSite().setDomain("http://www.bjfreeport.com/").addStartRequest(new Request("http://www.bjfreeport.com/index.html"));
 //		return new WebSite().setDomain("http://www.dytt8.net").addStartRequest(new Request("http://www.dytt8.net"));
 		return new WebSite()
-		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
+//		        .setHttpProxyPool(ProxyConfigLoad.getProxyList(ProxyLocConstant.PROXY_LOC_CURRENT))
 				.setDomain("http://bbs.tianya.cn/")
 				.addStartRequest(new Request("http://bbs.tianya.cn/"));
 	}
